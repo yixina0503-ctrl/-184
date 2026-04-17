@@ -79,7 +79,7 @@ export default function App() {
   }, []);
 
   const handleSelect = useCallback((folklore: Folklore) => {
-    console.log('Selected folklore:', folklore.name);
+    console.log('Selected folklore:', folklore.n);
     setSelectedFolklore(folklore);
   }, []);
 
@@ -123,7 +123,7 @@ export default function App() {
   return (
     <div className="fixed inset-0 bg-[#0D0D0F] text-[#F1F1F1] font-sans p-6 flex flex-col gap-6 overflow-hidden">
       <div className="absolute top-2 right-2 text-[10px] text-gold z-[100] bg-black/50 px-2 py-1 rounded">
-        系统运行中 | 数据: {folkloreData.length} | 月份: {activeMonthData?.name}
+        系统运行中 | 数据: {folkloreData.length} | 月份: {activeMonthData?.n}
       </div>
       {/* Header */}
       <header className="flex justify-between items-center shrink-0">
@@ -187,7 +187,7 @@ export default function App() {
                       : 'bg-white/5 text-text-dim hover:text-text-main hover:bg-white/10'
                   }`}
                 >
-                  {month.name}
+                  {month.n}
                 </button>
               ))}
             </div>
@@ -198,7 +198,7 @@ export default function App() {
         <div className="bento-card col-span-1 row-span-1 flex flex-col justify-center items-center text-center group">
           <div className="text-3xl font-bold group-hover:text-gold transition-colors">{filteredFolklore.length}</div>
           <div className="text-[10px] uppercase text-text-dim tracking-widest mt-1">
-            {activeMonth === 0 ? '总记录条目' : `${activeMonthData?.name}记录`}
+            {activeMonth === 0 ? '总记录条目' : `${activeMonthData?.n}记录`}
           </div>
           <TrendingUp size={16} className="absolute top-4 right-4 text-white/10" />
         </div>
@@ -208,7 +208,7 @@ export default function App() {
           <div className="flex items-center justify-between mb-4 shrink-0">
             <div className="flex items-center gap-2 text-gold text-[10px] uppercase tracking-widest font-bold">
               <Info size={12} />
-              <span>{activeMonthData?.name}民俗志</span>
+              <span>{activeMonthData?.n}民俗志</span>
             </div>
           </div>
           
@@ -233,7 +233,7 @@ export default function App() {
                         : 'bg-white/5 hover:bg-white/10 text-text-dim hover:text-text-main'
                     }`}
                   >
-                    <div className="text-[11px] font-bold truncate pr-4">{folklore.name}</div>
+                    <div className="text-[11px] font-bold truncate pr-4">{folklore.n}</div>
                     <div className="text-[9px] opacity-60 mt-0.5 flex items-center gap-1">
                       <MapPin size={8} />
                       {folklore.loc}
@@ -364,7 +364,7 @@ export default function App() {
                 </div>
 
                 <h2 className="text-4xl font-serif font-bold text-white tracking-tight leading-tight mb-6">
-                  {selectedFolklore.name}
+                  {selectedFolklore.n}
                 </h2>
                 
                 <div className="flex flex-wrap gap-3 mb-10">
@@ -395,7 +395,7 @@ export default function App() {
                         className="w-full h-full"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
-                        title={selectedFolklore.name}
+                        title={selectedFolklore.n}
                       />
                     </div>
                   )}
