@@ -256,26 +256,24 @@ export default function App() {
         <div className="bento-card col-span-3 row-span-1 !p-0 flex overflow-hidden">
           {timelineItems.length > 0 ? (
             <>
-              {timelineItems.map((item, idx) => ( //
-                <img
-                  src={`/images/${idx + 1}.jpg`} //
-                  className="..."
-                  alt={item.n}
-                  ...
-                />
-              </div>
-            ))}
+              {timelineItems.map((item, idx) => (
+                <div
+                  key={item.id}
+                  onClick={() => handleSelect(item)}
+                  className={`flex-1 relative group cursor-pointer overflow-hidden ${idx < 2 ? 'border-r border-border' : ''}`}
+                >
                   <img 
-                    TypeScript
                     src={`/images/${idx + 1}.jpg`}
                     className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
-                    alt={item.n} // constants.ts 中名字字段是 n
+                    alt={item.n}
                     referrerPolicy="no-referrer"
                     onError={(e) => {
-                      // 如果图片加载失败（比如索引超出了你上传的图片数量），显示备用图
                       (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop';
-                      }}
+                    }}
                   />
+                  {/* 这里确保有一个闭合的 </div> */}
+                  </div>
+                ))}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   <div className="relative h-full p-4 flex flex-col justify-between z-10">
                     <span className={`text-[10px] font-bold uppercase tracking-widest ${idx === 0 ? 'text-accent' : 'text-text-dim'}`}>
