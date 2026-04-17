@@ -268,7 +268,7 @@ export default function App() {
                     alt={item.name}
                     referrerPolicy="no-referrer"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop';
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x150/222222/888888?text=Image+Loading';
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -339,7 +339,7 @@ export default function App() {
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=1000&h=600&fit=crop';
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x400/222222/888888?text=No+Image+Available';
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#121214] via-transparent to-black/20 pointer-events-none" />
