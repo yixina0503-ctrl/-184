@@ -256,14 +256,17 @@ export default function App() {
         <div className="bento-card col-span-3 row-span-1 !p-0 flex overflow-hidden">
           {timelineItems.length > 0 ? (
             <>
-              {timelineItems.map((item, idx) => (
-                <div 
-                  key={item.id}
-                  onClick={() => handleSelect(item)}
-                  className={`flex-1 relative group cursor-pointer overflow-hidden ${idx < 2 ? 'border-r border-border' : ''}`}
-                >
+              {timelineItems.map((item, idx) => ( //
+                <img
+                  src={`/images/${idx + 1}.jpg`} //
+                  className="..."
+                  alt={item.n}
+                  ...
+                />
+              </div>
+            ))}
                   <img 
-                    // 核心逻辑：使用数组索引 idx + 1 来匹配 1.jpg, 2.jpg...
+                    TypeScript
                     src={`/images/${idx + 1}.jpg`}
                     className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
                     alt={item.n} // constants.ts 中名字字段是 n
@@ -336,13 +339,12 @@ export default function App() {
           >
             <div className="relative h-[40vh] shrink-0 bg-black">
               <img 
-                // 核心逻辑：在 folkloreData 数组中查找当前选中项的索引
+                // 这里的逻辑是：根据当前选中的名字，去原始数据里找它是第几个，从而匹配图片
                 src={`/images/${folkloreData.findIndex(f => f.n === selectedFolklore.n) + 1}.jpg`}
                 alt={selectedFolklore.n}
                 className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=1000&h=600&fit=crop';
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x400?text=No+Image';
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#121214] via-transparent to-black/20 pointer-events-none" />
