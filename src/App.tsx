@@ -252,48 +252,44 @@ export default function App() {
           </div>
         </div>
 
-        {/* Timeline / Gallery Card */}
-        <div className="bento-card col-span-3 row-span-1 !p-0 flex overflow-hidden">
-          {timelineItems.length > 0 ? (
-            <>
-              {timelineItems.map((item, idx) => (
-                <div
-                  key={item.id}
-                  onClick={() => handleSelect(item)}
-                  className={`flex-1 relative group cursor-pointer overflow-hidden ${idx < 2 ? 'border-r border-border' : ''}`}
-                >
-                  <img 
-                    src={`/images/${idx + 1}.jpg`}
-                    className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
-                    alt={item.n}
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop';
-                    }}
-                  />
-                  {/* 这里确保有一个闭合的 </div> */}
-                  </div>
-                ))}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="relative h-full p-4 flex flex-col justify-between z-10">
-                    <span className={`text-[10px] font-bold uppercase tracking-widest ${idx === 0 ? 'text-accent' : 'text-text-dim'}`}>
-                      {idx === 0 ? 'NOW' : idx === 1 ? 'UP NEXT' : 'LATER'}
-                    </span>
-                    <div>
-                      <div className="text-lg font-bold group-hover:text-gold transition-colors leading-tight">{item.date}</div>
-                      <div className="text-[10px] text-text-dim truncate mt-1">{item.name}</div>
+{/* Timeline / Gallery Card */}
+          <div className="bento-card col-span-3 row-span-1 !p-0 flex overflow-hidden">
+            {timelineItems.length > 0 ? (
+              <>
+                {timelineItems.map((item, idx) => (
+                  <div
+                    key={item.id}
+                    onClick={() => handleSelect(item)}
+                    className={`flex-1 relative group cursor-pointer overflow-hidden ${idx < 2 ? 'border-r border-border' : ''}`}
+                  >
+                    <img
+                      src={`/images/${idx + 1}.jpg`}
+                      className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
+                      alt={item.n}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="relative h-full p-4 flex flex-col justify-between z-10">
+                      <span className={`text-[10px] font-bold uppercase tracking-widest ${idx === 0 ? 'text-accent' : 'text-text-dim'}`}>
+                        {idx === 0 ? 'NOW' : idx === 1 ? 'UP NEXT' : 'LATER'}
+                      </span>
+                      <div>
+                        <div className="text-lg font-bold group-hover:text-gold transition-colors leading-tight">{item.date}</div>
+                        <div className="text-[10px] text-text-dim truncate mt-1">{item.n}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </>
-          ) : (
-            <div className="flex-grow flex items-center justify-center text-text-dim text-xs uppercase tracking-widest">
-              暂无活动排期
-            </div>
-          )}
-        </div>
-
+                ))}
+              </>
+            ) : (
+              <div className="flex-grow flex items-center justify-center text-text-dim text-xs uppercase tracking-widest">
+                暂无活动排期
+              </div>
+            )}
+          </div>
 
         {/* Reset View Button Overlay */}
         <AnimatePresence>
