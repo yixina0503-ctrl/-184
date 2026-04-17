@@ -263,11 +263,13 @@ export default function App() {
                     className={`flex-1 relative group cursor-pointer overflow-hidden ${idx < 2 ? 'border-r border-border' : ''}`}
                   >
                     <img
-                      src={`/images/${idx + 1}.jpg`}
+                      // 关键：不要用 idx+1（那是 0,1,2），要用 item 自身在原始数据中的位置
+                      src={`/images/${folkloreData.findIndex(f => f.n === item.n) + 1}.jpg`}
                       className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
                       alt={item.n}
                       referrerPolicy="no-referrer"
                       onError={(e) => {
+                        // 这里的备用图建议换一个明显的，方便你判断是不是出错了
                         (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop';
                       }}
                     />
@@ -333,12 +335,12 @@ export default function App() {
           >
             <div className="relative h-[40vh] shrink-0 bg-black">
               <img 
-                // 这里的逻辑是：根据当前选中的名字，去原始数据里找它是第几个，从而匹配图片
+                // 确保这里对比的是 .n 字段
                 src={`/images/${folkloreData.findIndex(f => f.n === selectedFolklore.n) + 1}.jpg`}
                 alt={selectedFolklore.n}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x400?text=No+Image';
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x400?text=图片整理中';
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#121214] via-transparent to-black/20 pointer-events-none" />
