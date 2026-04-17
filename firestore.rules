@@ -1,0 +1,64 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: contributions
+// Document ID: auto-generated
+// Fields:
+//   - name: string (required, 1-100 chars)
+//   - date: string (required, 1-50 chars)
+//   - loc: string (required, 1-100 chars)
+//   - lat: number (required, -90 to 90)
+//   - lng: number (required, -180 to 180)
+//   - desc: string (optional, 0-2000 chars)
+//   - mediaUrl: string (optional, valid URL)
+//   - mediaType: string (optional, 'image' or 'video')
+//   - userId: string (required, matches auth.uid)
+//   - userName: string (optional, 1-50 chars)
+//   - createdAt: timestamp (required)
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidContribution(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.date is string && data.date.size() > 0 && data.date.size() <= 50 &&
+             data.loc is string && data.loc.size() > 0 && data.loc.size() <= 100 &&
+             data.lat is number && data.lat >= -90 && data.lat <= 90 &&
+             data.lng is number && data.lng >= -180 && data.lng <= 180 &&
+             (!('desc' in data) || (data.desc is string && data.desc.size() <= 2000)) &&
+             (!('mediaUrl' in data) || (data.mediaUrl is string && data.mediaUrl.matches("^https?://.*"))) &&
+             (!('mediaType' in data) || (data.mediaType in ['image', 'video'])) &&
+             data.userId == request.auth.uid;
+    }
+
+    match /contributions/{contributionId} {
+      // Anyone can read contributions
+      allow read: if true;
+      
+      // Only authenticated users can create
+      allow create: if isAuthenticated() && 
+                      isValidContribution(request.resource.data) &&
+                      request.resource.data.createdAt == request.time;
+      
+      // Only owners can update or delete
+      allow update: if isOwner(resource.data.userId) && 
+                      isValidContribution(request.resource.data) &&
+                      request.resource.data.createdAt == resource.data.createdAt;
+      
+      allow delete: if isOwner(resource.data.userId);
+    }
+  }
+}

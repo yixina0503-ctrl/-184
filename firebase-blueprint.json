@@ -1,0 +1,29 @@
+{
+  "entities": {
+    "userContribution": {
+      "title": "User Folklore Contribution",
+      "description": "A folklore activity submitted by a user.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the folklore activity" },
+        "date": { "type": "string", "description": "Date of the activity" },
+        "loc": { "type": "string", "description": "Location name" },
+        "lat": { "type": "number", "description": "Latitude" },
+        "lng": { "type": "number", "description": "Longitude" },
+        "desc": { "type": "string", "description": "Description of the activity" },
+        "mediaUrl": { "type": "string", "description": "URL of the uploaded photo or video" },
+        "mediaType": { "type": "string", "enum": ["image", "video"], "description": "Type of media" },
+        "userId": { "type": "string", "description": "UID of the contributor" },
+        "userName": { "type": "string", "description": "Name of the contributor" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of creation" }
+      },
+      "required": ["name", "date", "loc", "lat", "lng", "userId"]
+    }
+  },
+  "firestore": {
+    "contributions": {
+      "schema": "userContribution",
+      "description": "Collection of user-submitted folklore activities"
+    }
+  }
+}

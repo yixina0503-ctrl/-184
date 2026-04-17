@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Inter", sans-serif;
+  --font-serif: "Noto Serif SC", "Georgia", "Source Han Serif CN", serif;
+  
+  --color-bg: #0D0D0F;
+  --color-card: #1A1A1D;
+  --color-accent: #E63946;
+  --color-gold: #D4AF37;
+  --color-text-main: #F1F1F1;
+  --color-text-dim: #A0A0A5;
+  --color-border: rgba(255, 255, 255, 0.1);
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #0D0D0F;
+  color: #F1F1F1;
+  overflow: hidden;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.bento-card {
+  @apply bg-card border border-border rounded-2xl p-5 relative overflow-hidden transition-all duration-300;
+}
+
+/* Leaflet Custom Styles */
+.leaflet-container {
+  background: #020205 !important;
+}
+
+.custom-popup .leaflet-popup-content-wrapper {
+  @apply bg-card border border-border text-text-main rounded-xl shadow-2xl;
+  background: #1A1A1D !important;
+}
+
+.custom-popup .leaflet-popup-tip {
+  @apply bg-card border-border;
+  background: #1A1A1D !important;
+}
+
+.custom-photo-marker {
+  background: none !important;
+  border: none !important;
+}
+
+.leaflet-popup-close-button {
+  @apply text-text-dim hover:text-accent;
+  color: var(--color-text-dim) !important;
+}
