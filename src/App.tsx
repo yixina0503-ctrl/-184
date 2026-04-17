@@ -263,13 +263,15 @@ export default function App() {
                   className={`flex-1 relative group cursor-pointer overflow-hidden ${idx < 2 ? 'border-r border-border' : ''}`}
                 >
                   <img 
-                    src={item.img}
+                    // 核心逻辑：使用数组索引 idx + 1 来匹配 1.jpg, 2.jpg...
+                    src={`/images/${idx + 1}.jpg`}
                     className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
-                    alt={item.name}
+                    alt={item.n} // constants.ts 中名字字段是 n
                     referrerPolicy="no-referrer"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x150/222222/888888?text=Image+Loading';
-                    }}
+                      // 如果图片加载失败（比如索引超出了你上传的图片数量），显示备用图
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop';
+                      }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   <div className="relative h-full p-4 flex flex-col justify-between z-10">
@@ -334,12 +336,13 @@ export default function App() {
           >
             <div className="relative h-[40vh] shrink-0 bg-black">
               <img 
-                src={selectedFolklore.img} 
-                alt={selectedFolklore.name}
+                // 核心逻辑：在 folkloreData 数组中查找当前选中项的索引
+                src={`/images/${folkloreData.findIndex(f => f.n === selectedFolklore.n) + 1}.jpg`}
+                alt={selectedFolklore.n}
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x400/222222/888888?text=No+Image+Available';
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=1000&h=600&fit=crop';
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#121214] via-transparent to-black/20 pointer-events-none" />
