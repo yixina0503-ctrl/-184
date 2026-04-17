@@ -1,6 +1,404 @@
-<img 
-  src={item.img} 
-  onError={(e) => {
-    (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=图片维护中';
-  }}
-/>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>华夏民俗志 - 184个民俗活动全览</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+        
+        :root {
+            --bg-color: #0D0D0F;
+            --card-bg: #1A1A1D;
+            --gold: #D4AF37;
+            --accent: #E63946;
+            --text-main: #F1F1F1;
+            --text-dim: #A0A0A5;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .serif { font-family: 'Noto Serif SC', serif; }
+
+        .folklore-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            padding: 40px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .folklore-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .folklore-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(212, 175, 55, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-image-box {
+            height: 200px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+        }
+
+        .card-image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .folklore-card:hover .card-image-box img {
+            transform: scale(1.1);
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            color: var(--gold);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 10;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .map-section {
+            height: 500px;
+            width: 90%;
+            max-width: 1400px;
+            margin: 40px auto;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Leaflet Dark Theme Overwrite */
+        .leaflet-container {
+            background: #020205 !important;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header class="py-16 px-6 text-center animate-fade-in">
+        <h1 class="text-5xl md:text-7xl serif font-bold text-[#D4AF37] mb-6 tracking-tight">华夏民俗志</h1>
+        <div class="h-1 w-24 bg-[#E63946] mx-auto mb-6"></div>
+        <p class="text-[#A0A0A5] text-sm md:text-base max-w-2xl mx-auto leading-relaxed tracking-widest uppercase">
+            Interactive Folk Archive • 184 Traditional Activities
+        </p>
+    </header>
+
+    <!-- Map Section -->
+    <div id="map" class="map-section animate-fade-in" style="animation-delay: 0.2s;"></div>
+
+    <!-- Stats Bar -->
+    <div class="max-w-7xl mx-auto px-6 mb-8 flex justify-between items-center text-[10px] text-text-dim uppercase tracking-widest font-bold">
+        <span>全量数据：184 条实体记录</span>
+        <div class="flex gap-4">
+            <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-gold"></div> 传统节庆</span>
+            <span class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-accent"></div> 地缘民俗</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main id="folklore-grid" class="folklore-container animate-fade-in" style="animation-delay: 0.4s;">
+        <!-- Dynamic Content Injected Here -->
+    </main>
+
+    <footer class="py-20 border-t border-white/5 text-center text-text-dim text-xs tracking-widest uppercase mt-20">
+        &copy; 2026 华夏民俗志项目组 • 非物质文化遗产数字化展示计划
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        // 184 条民俗活动数据阵列
+        const folkloreData = [
+            { id: 1, name: '春节', date: '正月初一', loc: '汉族地区', lat: 34.34, lng: 108.93 },
+            { id: 2, name: '傈僳族盍什节', date: '正月初一至初七', loc: '云南', lat: 25.04, lng: 102.71 },
+            { id: 3, name: '芦笙会', date: '正月初一至十五', loc: '贵州', lat: 26.59, lng: 106.70 },
+            { id: 4, name: '赫哲年', date: '正月初一', loc: '黑龙江', lat: 45.75, lng: 126.64 },
+            { id: 5, name: '朝鲜族元日', date: '正月初一', loc: '吉林', lat: 43.83, lng: 125.33 },
+            { id: 6, name: '傩戏表演', date: '正月初一', loc: '贵州', lat: 26.89, lng: 106.50 },
+            { id: 7, name: '壮族蚂拐节', date: '正月初一至二月初二', loc: '广西', lat: 22.81, lng: 108.36 },
+            { id: 8, name: '全丰花灯', date: '正月初一至十五', loc: '江西', lat: 28.67, lng: 115.89 },
+            { id: 9, name: '民间社火', date: '正月初一至十五', loc: '全国', lat: 35.34, lng: 108.53 },
+            { id: 10, name: '破五迎财神', date: '正月初五', loc: '全国', lat: 34.04, lng: 109.13 },
+            { id: 11, name: '彝族虎节', date: '正月初八至十五', loc: '云南', lat: 24.54, lng: 102.31 },
+            { id: 12, name: '苗族百鸟衣芦笙节', date: '正月初八', loc: '广西', lat: 23.21, lng: 108.76 },
+            { id: 13, name: '苗族跳花节', date: '正月初九、初十', loc: '贵州', lat: 26.29, lng: 107.10 },
+            { id: 14, name: '广东大沥狮子会', date: '正月初九', loc: '广东', lat: 23.12, lng: 113.26 },
+            { id: 15, name: '苗族四月八姑娘节', date: '正月初十、四月初八', loc: '湖南', lat: 28.11, lng: 112.98 },
+            { id: 16, name: '惠安女游灯', date: '正月十三', loc: '福建', lat: 26.07, lng: 119.29 },
+            { id: 17, name: '安徽汪满田鱼灯会', date: '正月十三至十六', loc: '安徽', lat: 31.86, lng: 117.28 },
+            { id: 18, name: '亦扎石社火', date: '正月十三至十六', loc: '青海', lat: 36.62, lng: 101.77 },
+            { id: 19, name: '元宵灯会', date: '正月十五', loc: '全国', lat: 39.90, lng: 116.40 },
+            { id: 20, name: '土族晒佛节', date: '正月十五', loc: '青海', lat: 36.42, lng: 102.17 },
+            { id: 21, name: '纳西族棒棒节', date: '正月十五', loc: '云南', lat: 25.54, lng: 101.91 },
+            { id: 22, name: '白族青姑娘节', date: '正月十五', loc: '云南', lat: 25.84, lng: 102.11 },
+            { id: 23, name: '河北井陉花脸社火', date: '正月十五', loc: '河北', lat: 38.03, lng: 114.48 },
+            { id: 24, name: '宜章夜故事', date: '正月初一至十五', loc: '湖南', lat: 27.81, lng: 113.28 },
+            { id: 25, name: '甲路抬阁', date: '正月十五', loc: '安徽', lat: 31.46, lng: 117.68 },
+            { id: 26, name: '布依族“了年”', date: '正月三十', loc: '贵州', lat: 26.19, lng: 106.30 },
+            { id: 27, name: '添仓节', date: '正月二十五', loc: '满族', lat: 41.67, lng: 123.46 },
+            { id: 28, name: '陕西汉中烧火龙', date: '春节期间', loc: '陕西', lat: 34.34, lng: 108.93 },
+            { id: 29, name: '云南彝族跳虎笙', date: '正月', loc: '云南', lat: 24.34, lng: 103.11 },
+            { id: 30, name: '贵州傩戏', date: '正月', loc: '贵州', lat: 26.99, lng: 106.10 },
+            { id: 31, name: '广东乐安花灯会', date: '正月', loc: '广东', lat: 22.82, lng: 113.56 },
+            { id: 32, name: '广东赤山跳火光', date: '正月', loc: '广东', lat: 23.42, lng: 113.06 },
+            { id: 33, name: '安徽板凳龙', date: '正月', loc: '安徽', lat: 31.16, lng: 116.98 },
+            { id: 34, name: '浙江迎龙灯', date: '正月', loc: '浙江', lat: 30.27, lng: 120.15 },
+            { id: 35, name: '北京厂甸庙会', date: '正月初一至初五', loc: '北京', lat: 39.90, lng: 116.40 },
+            { id: 36, name: '云南剑川太子会', date: '二月初八', loc: '云南', lat: 26.04, lng: 99.71 },
+            { id: 37, name: '彝族插花节', date: '二月初八', loc: '云南', lat: 25.24, lng: 101.51 },
+            { id: 38, name: '纳西族米拉会', date: '二月初八', loc: '云南', lat: 26.84, lng: 100.21 },
+            { id: 39, name: '二月二龙抬头', date: '二月初二', loc: '全国', lat: 34.64, lng: 113.62 },
+            { id: 40, name: '苗族走亲节', date: '二月初二', loc: '贵州', lat: 26.39, lng: 107.40 },
+            { id: 41, name: '四印苗族二月桃花节', date: '二月初六', loc: '贵州', lat: 26.49, lng: 107.70 },
+            { id: 42, name: '阿昌族泼水节', date: '二月二十九', loc: '云南', lat: 24.84, lng: 98.41 },
+            { id: 43, name: '立春节气活动', date: '2月3-5日', loc: '全国', lat: 32.04, lng: 118.78 },
+            { id: 44, name: '壮族歌圩', date: '春、秋二季', loc: '广西', lat: 23.41, lng: 109.16 },
+            { id: 45, name: '黎族三月三', date: '三月初三', loc: '海南', lat: 20.03, lng: 110.35 },
+            { id: 46, name: '布依族三月三', date: '三月初三', loc: '贵州', lat: 25.99, lng: 106.90 },
+            { id: 47, name: '北帝三月三庙会', date: '三月初三前后', loc: '广东', lat: 23.52, lng: 113.56 },
+            { id: 48, name: '登封中岳庙会', date: '三月初一', loc: '河南', lat: 34.45, lng: 113.12 },
+            { id: 49, name: '三月三（畲族）', date: '三月初三', loc: '浙江', lat: 29.87, lng: 119.85 },
+            { id: 50, name: '白族大理三月街', date: '三月十五至二十日', loc: '云南', lat: 25.64, lng: 100.11 },
+            { id: 51, name: '彝族赛衣节', date: '三月二十八日', loc: '云南', lat: 25.14, lng: 101.31 },
+            { id: 52, name: '傣族泼水节', date: '清明前后', loc: '云南', lat: 22.04, lng: 100.71 },
+            { id: 53, name: '渔民开洋节', date: '三月十五至二十三', loc: '浙江', lat: 29.97, lng: 122.15 },
+            { id: 54, name: '清明节祭祖', date: '4月4-6日', loc: '全国', lat: 31.86, lng: 118.28 },
+            { id: 55, name: '仫佬族牛生日节', date: '农历四月', loc: '广西', lat: 23.91, lng: 108.86 },
+            { id: 56, name: '苗族跳花节', date: '四月初八', loc: '贵州', lat: 26.19, lng: 107.00 },
+            { id: 57, name: '布依族四月八', date: '四月初八', loc: '贵州', lat: 25.89, lng: 106.80 },
+            { id: 58, name: '畲族牛歇节', date: '四月初八', loc: '福建', lat: 26.57, lng: 119.09 },
+            { id: 59, name: '白族绕三灵', date: '四月二十二至二十五', loc: '云南', lat: 25.74, lng: 100.21 },
+            { id: 60, name: '白族栽秧会', date: '芒种节令', loc: '云南', lat: 25.54, lng: 100.41 },
+            { id: 61, name: '苗族独木龙舟节', date: '农历五月', loc: '贵州', lat: 26.79, lng: 107.80 },
+            { id: 62, name: '端午节', date: '五月初五', loc: '全国', lat: 30.59, lng: 114.30 },
+            { id: 63, name: '塔吉克族迄脱乞迪尔节', date: '公历3月', loc: '新疆', lat: 37.82, lng: 75.21 },
+            { id: 64, name: '柯尔克孜族诺肉孜节', date: '3月21日前后', loc: '新疆', lat: 39.82, lng: 76.61 },
+            { id: 65, name: '柯尔克孜族西依耐节', date: '6-7月', loc: '新疆', lat: 40.82, lng: 77.61 },
+            { id: 66, name: '柯尔克孜族喀尔嘎托依节', date: '7月22日', loc: '新疆', lat: 41.82, lng: 78.61 },
+            { id: 67, name: '苗族吃新节', date: '农历六月', loc: '贵州', lat: 26.59, lng: 108.10 },
+            { id: 68, name: '藏族沐浴节', date: '农历六月', loc: '西藏', lat: 29.64, lng: 91.11 },
+            { id: 69, name: '布依族六月六', date: '六月初六', loc: '贵州', lat: 25.79, lng: 106.60 },
+            { id: 70, name: '满族虫王节', date: '六月初六', loc: '全国', lat: 43.83, lng: 126.33 },
+            { id: 71, name: '彝族、白族火把节', date: '六月二十四日', loc: '云南', lat: 25.04, lng: 101.51 },
+            { id: 72, name: '阿昌族火把节', date: '六月二十五日', loc: '云南', lat: 24.44, lng: 98.21 },
+            { id: 73, name: '纳西族三多节', date: '六月二十五日', loc: '云南', lat: 26.84, lng: 100.11 },
+            { id: 74, name: '哈尼族苦扎扎', date: '农历六月', loc: '云南', lat: 23.84, lng: 102.31 },
+            { id: 75, name: '藏族雪顿节', date: '农历六月', loc: '西藏', lat: 29.74, lng: 91.01 },
+            { id: 76, name: '藏族香浪节', date: '农历六月', loc: '甘肃', lat: 34.06, lng: 102.82 },
+            { id: 77, name: '彝族密枝节', date: '农历六月', loc: '云南', lat: 24.14, lng: 103.51 },
+            { id: 78, name: '彝族赛装节', date: '农历六月', loc: '云南', lat: 25.34, lng: 101.01 },
+            { id: 79, name: '哈尼族捉蚂蚱节', date: '农历六月', loc: '云南', lat: 23.24, lng: 102.81 },
+            { id: 80, name: '苗族赶秋节', date: '农历六月', loc: '湖南', lat: 28.51, lng: 110.28 },
+            { id: 81, name: '达斡尔族卡钦', date: '农历六月', loc: '内蒙古', lat: 48.44, lng: 123.75 },
+            { id: 82, name: '普米族转海会', date: '农历六月', loc: '云南', lat: 27.54, lng: 100.41 },
+            { id: 83, name: '四川凉山彝族选美', date: '农历六月', loc: '四川', lat: 27.65, lng: 102.26 },
+            { id: 84, name: '西藏望果节', date: '藏历七、八月', loc: '西藏', lat: 29.24, lng: 91.51 },
+            { id: 85, name: '热贡六月会', date: '农历六月十七至二十五', loc: '青海', lat: 35.62, lng: 102.07 },
+            { id: 86, name: '鄂伦春族古伦木沓节', date: '农历六月', loc: '黑龙江', lat: 50.75, lng: 124.64 },
+            { id: 87, name: '羌族瓦尔俄足节', date: '农历六月', loc: '四川', lat: 31.65, lng: 103.46 },
+            { id: 88, name: '蒙古族那达慕', date: '农历六月初四', loc: '内蒙古', lat: 43.84, lng: 115.75 },
+            { id: 89, name: '甘肃陇南乞巧女儿节', date: '六月二十九至七月初七', loc: '甘肃', lat: 33.06, lng: 105.12 },
+            { id: 90, name: '苗族上刀梯', date: '农历七月', loc: '湖南', lat: 28.31, lng: 110.08 },
+            { id: 91, name: '阿昌族撒神', date: '七月初一', loc: '云南', lat: 24.64, lng: 98.11 },
+            { id: 92, name: '中元节', date: '七月初一至十五', loc: '全国', lat: 31.34, lng: 121.43 },
+            { id: 93, name: '七夕节', date: '七月初七', loc: '全国', lat: 34.75, lng: 113.62 },
+            { id: 94, name: '白族石宝山歌会', date: '农历七月下旬', loc: '云南', lat: 26.44, lng: 99.81 },
+            { id: 95, name: '纳西族七月会', date: '农历七月', loc: '云南', lat: 26.74, lng: 100.31 },
+            { id: 96, name: '白族耍海会', date: '农历七月', loc: '云南', lat: 25.84, lng: 100.21 },
+            { id: 97, name: '蒙古族那达慕 (秋季)', date: '农历七月', loc: '内蒙古', lat: 42.84, lng: 114.75 },
+            { id: 98, name: '苗族姊妹节', date: '农历七月', loc: '贵州', lat: 26.69, lng: 108.30 },
+            { id: 99, name: '彝族护山节', date: '农历七月', loc: '云南', lat: 24.84, lng: 102.51 },
+            { id: 100, name: '朝鲜族百种节', date: '农历七月十五', loc: '吉林', lat: 42.83, lng: 129.33 },
+            { id: 101, name: '苗族吃新节 (秋季)', date: '农历八月', loc: '贵州', lat: 26.49, lng: 108.50 },
+            { id: 102, name: '中秋节', date: '八月十五', loc: '全国', lat: 31.12, lng: 121.56 },
+            { id: 103, name: '白族渔潭会', date: '八月十五', loc: '云南', lat: 25.94, lng: 100.11 },
+            { id: 104, name: '阿昌族尝新节', date: '八月十五', loc: '云南', lat: 24.54, lng: 98.31 },
+            { id: 105, name: '蒙古族马奶节', date: '农历八月', loc: '内蒙古', lat: 44.84, lng: 116.75 },
+            { id: 106, name: '朝鲜族百种节（八月）', date: '农历八月', loc: '吉林', lat: 43.13, lng: 128.83 },
+            { id: 107, name: '藏族沐浴节（八月）', date: '农历八月', loc: '西藏', lat: 29.54, lng: 91.21 },
+            { id: 108, name: '水族端节', date: '农历八月至十月', loc: '贵州', lat: 25.89, lng: 107.80 },
+            { id: 109, name: '苗族八月八风情节', date: '农历八月初八', loc: '贵州', lat: 26.45, lng: 106.60 },
+            { id: 110, name: '山西尉村跑鼓车', date: '农历九月', loc: '山西', lat: 36.17, lng: 111.55 },
+            { id: 111, name: '山西独辕四景车赛会', date: '农历九月', loc: '山西', lat: 38.87, lng: 112.55 },
+            { id: 112, name: '浙江径山茶宴', date: '农历九月', loc: '浙江', lat: 30.47, lng: 119.85 },
+            { id: 113, name: '青海德都蒙古全席', date: '农历九月', loc: '青海', lat: 37.12, lng: 97.37 },
+            { id: 114, name: '京族哈节', date: '农历九月', loc: '广西', lat: 21.51, lng: 108.16 },
+            { id: 115, name: '布依族查白歌节', date: '农历九月', loc: '贵州', lat: 25.12, lng: 104.90 },
+            { id: 116, name: '塔吉克族引水节和播种节', date: '农历九月', loc: '新疆', lat: 37.77, lng: 75.23 },
+            { id: 117, name: '土族纳顿节', date: '农历九月', loc: '青海', lat: 36.12, lng: 102.97 },
+            { id: 118, name: '重阳节', date: '九月初九', loc: '全国', lat: 32.14, lng: 119.23 },
+            { id: 119, name: '阿昌族会街节', date: '九月初十', loc: '云南', lat: 24.34, lng: 98.11 },
+            { id: 120, name: '蒙古族祭敖包', date: '农历九月', loc: '内蒙古', lat: 41.84, lng: 112.75 },
+            { id: 121, name: '中国农民丰收节', date: '公历9月23日左右', loc: '全国', lat: 38.65, lng: 117.22 },
+            { id: 122, name: '哈尼族十月年', date: '农历十月', loc: '云南', lat: 23.44, lng: 102.51 },
+            { id: 123, name: '拉祜族葫芦节', date: '农历十月', loc: '云南', lat: 22.84, lng: 100.11 },
+            { id: 124, name: '苗族苗年', date: '农历十月至十一月', loc: '贵州', lat: 26.49, lng: 107.90 },
+            { id: 125, name: '白族本主节', date: '农历十月', loc: '云南', lat: 25.64, lng: 100.21 },
+            { id: 126, name: '瑶族盘王节', date: '农历十月', loc: '广东', lat: 24.62, lng: 112.26 },
+            { id: 127, name: '侗年', date: '农历十一月', loc: '贵州', lat: 26.29, lng: 108.90 },
+            { id: 128, name: '瑶族祝著节', date: '农历五月二十九', loc: '广西', lat: 24.01, lng: 107.16 },
+            { id: 129, name: '壮族侬峒节', date: '农历二、四、六月', loc: '广西', lat: 22.81, lng: 107.36 },
+            { id: 130, name: '基诺族特懋克节', date: '农历腊月', loc: '云南', lat: 21.94, lng: 101.11 },
+            { id: 131, name: '普米族拈达则封山仪式', date: '农历腊月', loc: '云南', lat: 27.24, lng: 100.11 },
+            { id: 132, name: '河南老子祭典', date: '二月十五', loc: '河南', lat: 33.95, lng: 115.12 },
+            { id: 133, name: '赫哲族乌日贡大会', date: '农历五月', loc: '黑龙江', lat: 47.75, lng: 132.64 },
+            { id: 134, name: '甘肃龙神赛会', date: '农历六月', loc: '甘肃', lat: 35.56, lng: 103.82 },
+            { id: 135, name: '吉林松花江放河灯', date: '七月十五', loc: '吉林', lat: 43.83, lng: 126.53 },
+            { id: 136, name: '壮族会鼓习俗', date: '腊月二十四', loc: '广西', lat: 23.81, lng: 108.06 },
+            { id: 137, name: '徐州伏羊食俗', date: '六月六', loc: '江苏', lat: 34.24, lng: 117.18 },
+            { id: 138, name: '独龙族卡雀哇节', date: '农历十二月', loc: '云南', lat: 27.84, lng: 98.31 },
+            { id: 139, name: '腊八节', date: '腊月初八', loc: '全国', lat: 36.65, lng: 117.12 },
+            { id: 140, name: '祭灶', date: '腊月二十三', loc: '全国', lat: 34.75, lng: 113.62 },
+            { id: 141, name: '土家年', date: '腊月二十九', loc: '湖南', lat: 29.11, lng: 110.48 },
+            { id: 142, name: '除夕守岁', date: '腊月三十', loc: '全国', lat: 31.23, lng: 121.47 },
+            { id: 143, name: '傣族送龙节', date: '1月', loc: '云南', lat: 21.94, lng: 101.21 },
+            { id: 144, name: '羌年', date: '十月初一', loc: '四川', lat: 31.72, lng: 103.86 },
+            { id: 145, name: '藏族藏历年', date: '藏历正月初一', loc: '西藏', lat: 29.64, lng: 91.11 },
+            { id: 146, name: '彝族年', date: '十月至十一月', loc: '四川', lat: 27.89, lng: 102.26 },
+            { id: 147, name: '傣族关门节', date: '7月中旬', loc: '云南', lat: 22.04, lng: 100.81 },
+            { id: 148, name: '傣族开门节', date: '10月中旬', loc: '云南', lat: 22.14, lng: 100.91 },
+            { id: 149, name: '佤族拉木鼓节', date: '公历12月', loc: '云南', lat: 23.14, lng: 99.21 },
+            { id: 150, name: '藏族插箭节', date: '公历6月', loc: '西藏', lat: 30.64, lng: 92.11 },
+            { id: 151, name: '多民族服饰展示', date: '节日期间', loc: '全国', lat: 35.86, lng: 104.19 },
+            { id: 152, name: '裕固族祭大鄂博', date: '农历六月', loc: '甘肃', lat: 38.66, lng: 100.62 },
+            { id: 153, name: '土族安昭', date: '农历正月', loc: '青海', lat: 36.62, lng: 101.97 },
+            { id: 154, name: '满族颁金节', date: '农历十月十三', loc: '全国', lat: 41.97, lng: 123.66 },
+            { id: 155, name: '锡伯族西迁节', date: '农历四月十八', loc: '新疆', lat: 43.82, lng: 81.31 },
+            { id: 156, name: '羌族领歌节', date: '农历十月初一', loc: '四川', lat: 31.95, lng: 103.56 },
+            { id: 157, name: '独龙族卡雀哇', date: '农历十二月', loc: '云南', lat: 27.74, lng: 98.51 },
+            { id: 158, name: '珞巴族昂尼节', date: '农历二月', loc: '西藏', lat: 29.14, lng: 94.31 },
+            { id: 159, name: '门巴族萨嘎达瓦节', date: '农历四月十五', loc: '西藏', lat: 27.94, lng: 91.91 },
+            { id: 160, name: '基诺族好考节', date: '农历九月', loc: '云南', lat: 21.84, lng: 101.31 },
+            { id: 161, name: '怒族仙女节', date: '农历三月十五', loc: '云南', lat: 27.94, lng: 98.61 },
+            { id: 162, name: '德昂族泼水节', date: '农历三月', loc: '云南', lat: 24.14, lng: 98.51 },
+            { id: 163, name: '景颇族目瑙纵歌', date: '正月十五左右', loc: '云南', lat: 24.44, lng: 98.51 },
+            { id: 164, name: '布朗族簪花节', date: '农历三月', loc: '云南', lat: 21.64, lng: 100.11 },
+            { id: 165, name: '普米族吾昔节', date: '农历十二月初八', loc: '云南', lat: 26.84, lng: 100.11 },
+            { id: 166, name: '鄂温克族瑟宾节', date: '6月18日', loc: '内蒙古', lat: 49.24, lng: 119.75 },
+            { id: 167, name: '鄂伦春族篝火节', date: '6月18日', loc: '黑龙江', lat: 51.75, lng: 124.64 },
+            { id: 168, name: '赫哲族开飞节', date: '农历五月', loc: '黑龙江', lat: 47.95, lng: 133.64 },
+            { id: 169, name: '俄罗斯族巴斯克节', date: '公历4月', loc: '内蒙古', lat: 50.24, lng: 120.15 },
+            { id: 170, name: '塔塔尔族撒班节', date: '公历6月', loc: '新疆', lat: 43.82, lng: 87.61 },
+            { id: 171, name: '乌孜别克族苏姆拉克', date: '公历3月21日', loc: '新疆', lat: 41.22, lng: 80.61 },
+            { id: 172, name: '撒拉族古尔邦节', date: '农历十二月', loc: '青海', lat: 35.85, lng: 102.47 },
+            { id: 173, name: '东乡族圣纪节', date: '农历三月十二', loc: '甘肃', lat: 35.66, lng: 103.32 },
+            { id: 174, name: '保安族冬至节', date: '公历12月22日', loc: '甘肃', lat: 35.76, lng: 102.92 },
+            { id: 175, name: '京族唱哈', date: '农历六月初十', loc: '广西', lat: 21.61, lng: 108.06 },
+            { id: 176, name: '毛南族分龙节', date: '农历五月', loc: '广西', lat: 24.85, lng: 107.96 },
+            { id: 177, name: '仫佬族走坡节', date: '农历正月十五', loc: '广西', lat: 24.75, lng: 108.96 },
+            { id: 178, name: '水族借端', date: '农历十月', loc: '贵州', lat: 25.99, lng: 107.90 },
+            { id: 179, name: '仡佬族吃新节', date: '农历七、八月', loc: '贵州', lat: 27.29, lng: 107.60 },
+            { id: 180, name: '羌族祭山会', date: '农历五月', loc: '四川', lat: 31.45, lng: 103.66 },
+            { id: 181, name: '藏族邦锦美朵', date: '农历七月', loc: '西藏', lat: 31.14, lng: 97.21 },
+            { id: 182, name: '门巴岁节', date: '藏历正月初一', loc: '西藏', lat: 27.94, lng: 91.91 },
+            { id: 183, name: '珞巴希那节', date: '农历十月', loc: '西藏', lat: 29.24, lng: 94.21 },
+            { id: 184, name: '南海官窑生菜会', date: '农历正月廿六', loc: '广东', lat: 23.32, lng: 113.16 }
+        ];
+
+        // 渲染卡片逻辑
+        const grid = document.getElementById('folklore-grid');
+        folkloreData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = "folklore-card group";
+            
+            card.innerHTML = `
+                <div class="card-image-box">
+                    <div class="card-badge">序号 ${item.id}</div>
+                    <img 
+                        src="/images/${item.id}.jpg" 
+                        alt="${item.name}"
+                        loading="lazy"
+                        onerror="this.src='https://placehold.co/600x400?text=图片维护中'"
+                    />
+                </div>
+                <div class="p-6">
+                    <h3 class="serif text-xl font-bold text-white mb-3 group-hover:text-[#D4AF37] transition-colors">
+                        ${item.name}
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-xs text-[#A0A0A5]">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-[#E63946]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            ${item.loc}
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-[#A0A0A5]">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-[#D4AF37]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            ${item.date}
+                        </div>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        // 初始化地图逻辑
+        const map = L.map('map', {
+            zoomControl: false,
+            scrollWheelZoom: false
+        }).setView([35.8617, 104.1954], 4);
+
+        // 引入暗黑地图图层
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; Leaflet | &copy; CARTO'
+        }).addTo(map);
+
+        // 打点标记
+        folkloreData.forEach(item => {
+            const marker = L.circleMarker([item.lat, item.lng], {
+                radius: 6,
+                fillColor: "#D4AF37",
+                color: "#E63946",
+                weight: 1,
+                opacity: 0.8,
+                fillOpacity: 0.8
+            }).addTo(map);
+
+            marker.bindPopup(`<div class="p-2 serif"><b>${item.name}</b><br><small class='text-gray-500'>${item.loc}</small></div>`);
+        });
+    </script>
+</body>
+</html>
