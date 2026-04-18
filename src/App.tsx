@@ -253,45 +253,46 @@ export default function App() {
         </div>
 
 {/* Timeline / Gallery Card */}
-          <div className="bento-card col-span-3 row-span-1 !p-0 flex overflow-hidden">
-            {timelineItems.length > 0 ? (
-              <>
-                {timelineItems.map((item, idx) => (
-                  <div
-                    key={item.id}
-                    onClick={() => handleSelect(item)}
-                    className={`flex-1 relative group cursor-pointer overflow-hidden ${idx < 2 ? 'border-r border-border' : ''}`}
-                  >
-                    <img
-                      // 关键：不要用 idx+1（那是 0,1,2），要用 item 自身在原始数据中的位置
-                      src={`/images/${folkloreData.findIndex(f => f.n === item.n) + 1}.jpg`}
-                      className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
-                      alt={item.n}
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        // 这里的备用图建议换一个明显的，方便你判断是不是出错了
-                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop';
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    <div className="relative h-full p-4 flex flex-col justify-between z-10">
-                      <span className={`text-[10px] font-bold uppercase tracking-widest ${idx === 0 ? 'text-accent' : 'text-text-dim'}`}>
-                        {idx === 0 ? 'NOW' : idx === 1 ? 'UP NEXT' : 'LATER'}
-                      </span>
-                      <div>
-                        <div className="text-lg font-bold group-hover:text-gold transition-colors leading-tight">{item.date}</div>
-                        <div className="text-[10px] text-text-dim truncate mt-1">{item.n}</div>
-                      </div>
+      <div className="bento-card col-span-3 row-span-1 !p-0 flex overflow-hidden">
+        {timelineItems.length > 0 ? (
+          <>
+            {timelineItems.map((item, idx) => (
+              <div 
+                key={item.id || idx}
+                onClick={() => handleSelect(item)}
+                className={`flex-1 relative group cursor-pointer overflow-hidden ${idx < 2 ? 'border-r border-white/10' : ''}`}
+              >
+                <img 
+                  src={`/images/${idx + 1}.jpg`} 
+                  className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
+                  alt={item.name}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="relative h-full p-4 flex flex-col justify-between z-10">
+                  <span className={`text-[10px] font-bold uppercase tracking-widest ${idx === 0 ? 'text-accent' : 'text-text-dim'}`}>
+                    {idx === 0 ? 'NOW' : idx === 1 ? 'UP NEXT' : 'LATER'}
+                  </span>
+                  <div>
+                    <div className="text-lg font-bold group-hover:text-gold transition-colors leading-tight">
+                      {item.date}
+                    </div>
+                    <div className="text-[10px] text-text-dim truncate mt-1">
+                      {item.name}
                     </div>
                   </div>
-                ))}
-              </>
-            ) : (
-              <div className="flex-grow flex items-center justify-center text-text-dim text-xs uppercase tracking-widest">
-                暂无活动排期
+                </div>
               </div>
-            )}
+            ))}
+          </>
+        ) : (
+          <div className="flex-grow flex items-center justify-center text-text-dim text-xs uppercase tracking-widest">
+            暂无活动排期
           </div>
+        )}
+      </div>
 
         {/* Reset View Button Overlay */}
         <AnimatePresence>
@@ -333,22 +334,21 @@ export default function App() {
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="fixed top-0 right-0 bottom-0 z-[9999] w-full md:w-[500px] bg-[#121214]/98 backdrop-blur-2xl border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] flex flex-col"
           >
-            <div className="relative h-[40vh] shrink-0 bg-black">
+            <div className="relative h-64 w-full">
               <img 
-                // 确保这里对比的是 .n 字段
-                src={`/images/${folkloreData.findIndex(f => f.n === selectedFolklore.n) + 1}.jpg`}
-                alt={selectedFolklore.n}
+                src={`/images/${selectedFolklore.id}.jpg`}
+                alt={selectedFolklore.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x400?text=图片整理中';
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop';
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#121214] via-transparent to-black/20 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
               <button 
-                onClick={handleReset}
-                className="absolute top-6 right-6 p-3 bg-black/50 hover:bg-red-600/80 rounded-full transition-all duration-300 text-white group z-10"
+                onClick={() => setSelectedFolklore(null)}
+                className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/80 rounded-full transition-colors"
               >
-                <X size={24} className="group-hover:rotate-90 transition-transform" />
+                <X size={20} />
               </button>
             </div>
 
