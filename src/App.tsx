@@ -79,7 +79,6 @@ export default function App() {
   }, []);
 
   const handleSelect = useCallback((folklore: Folklore) => {
-    console.log('Selected folklore:', folklore.n);
     setSelectedFolklore(folklore);
   }, []);
 
@@ -147,10 +146,7 @@ export default function App() {
               activeMonth={activeMonth} 
               onSelect={handleSelect} 
               selectedId={selectedFolklore?.id} 
-              // 确保这里传的是上面新生成的 allFolklore
-              folkloreData={allFolklore}
-                userContributions={filteredUserContributions}
-                // ... 其他 props
+              folkloreData={allFolklore} // 确保这里使用了合并后的数据
             />
           </div>
 
