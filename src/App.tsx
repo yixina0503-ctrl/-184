@@ -87,15 +87,22 @@ export default function App() {
     setSelectedFolklore(null);
   };
 
-  const activeMonthData = months.find(m => m.id === activeMonth);
+const activeMonthData = months.find(m => m.id === activeMonth);
+
+  // 1. 核心修复：使用 Number() 强制转换，确保数据类型匹配，并处理数据中可能缺少的 month 字段
   const filteredFolklore = activeMonth === 0 
     ? folkloreData 
-    : folkloreData.filter(f => f.month === activeMonth);
+    : folkloreData.filter(f => Number(f.month) === activeMonth);
 
-  // Combine and sort by month
-  const allFolklore = [...filteredFolklore, ...userContributions].sort((a, b) => {
-    const monthA = a.month || 1;
-    const monthB = b.month || 1;
+  // 2. 核心修复：确保 userContributions 也参与月份筛选（否则切换月份时，用户贡献的数据会一直显示）
+  const filteredUserContributions = activeMonth === 0
+    ? userContributions
+    : userContributions.filter(c => Number(c.month) === activeMonth);
+
+  // 3. 组合筛选后的结果，这将直接影响地图上显示的图标数量和内容
+  const allFolklore = [...filteredFolklore, ...filteredUserContributions].sort((a, b) => {
+    const monthA = Number(a.month) || 1;
+    const monthB = Number(b.month) || 1;
     return monthA - monthB;
   });
 
