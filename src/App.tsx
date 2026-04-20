@@ -117,7 +117,7 @@ export default function App() {
   return (
     <div className="fixed inset-0 bg-[#0D0D0F] text-[#F1F1F1] font-sans p-6 flex flex-col gap-6 overflow-hidden">
       <div className="absolute top-2 right-2 text-[10px] text-gold z-[100] bg-black/50 px-2 py-1 rounded">
-        系统运行中 | 数据: {folkloreData.length} | 月份: {activeMonthData?.n}
+        系统运行中 | 数据: {folkloreData.length} | 月份: {activeMonthData?.name}
       </div>
       {/* Header */}
       <header className="flex justify-between items-center shrink-0">
