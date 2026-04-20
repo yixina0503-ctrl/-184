@@ -87,8 +87,6 @@ export default function App() {
     setSelectedFolklore(null);
   };
 
-const activeMonthData = months.find(m => m.id === activeMonth);
-
   const activeMonthData = months.find(m => m.id === activeMonth);
   const filteredFolklore = activeMonth === 0 
     ? folkloreData 
