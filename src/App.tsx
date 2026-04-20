@@ -177,7 +177,7 @@ export default function App() {
                       : 'bg-white/5 text-text-dim hover:text-text-main hover:bg-white/10'
                   }`}
                 >
-                  {month.n}
+                  {month.name}
                 </button>
               ))}
             </div>
