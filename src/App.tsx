@@ -159,11 +159,10 @@ const activeMonthData = months.find(m => m.id === activeMonth);
               activeMonth={activeMonth} 
               onSelect={handleSelect} 
               selectedId={selectedFolklore?.id} 
-              userContributions={userContributions}
-              onMapClick={(lat, lng) => {
-                // Optional: handle map click to pre-fill location
-                console.log('Map clicked:', lat, lng);
-              }}
+              // 确保这里传的是上面新生成的 allFolklore
+              folkloreData={allFolklore}
+                userContributions={filteredUserContributions}
+                // ... 其他 props
             />
           </div>
 
