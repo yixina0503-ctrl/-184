@@ -17,7 +17,7 @@ const COORDS_MAP: Record<string, [number, number]> = {
 };
 
 const rawData = [
-  { n: '春节', t: '正月初一', l: '汉族地区'，img: '/images/61.jpg' },
+  { n: '春节', t: '正月初一', l: '汉族地区', img: '/images/61.jpg' },
   { n: '傈僳族盍什节', t: '正月初一至初七', l: '云南' },
   { n: '芦笙会', t: '正月初一至十五', l: '贵州' },
   { n: '赫哲年', t: '正月初一', l: '黑龙江' },
@@ -44,7 +44,7 @@ const rawData = [
   { n: '甲路抬阁', t: '正月十五', l: '安徽' },
   { n: '布依族“了年”', t: '正月三十', l: '贵州' },
   { n: '添仓节', t: '正月二十五', l: '满族' },
-  { n: '陕西汉中烧火龙', t: '春节期间', l: '陕西'，img: '/images/13.jpg' },
+  { n: '陕西汉中烧火龙', t: '春节期间', l: '陕西', img: '/images/13.jpg' },
   { n: '云南彝族跳虎笙', t: '正月', l: '云南' },
   { n: '贵州傩戏', t: '正月', l: '贵州' },
   { n: '广东乐安花灯会', t: '正月', l: '广东' },
@@ -58,11 +58,11 @@ const rawData = [
   { n: '二月二龙抬头', t: '二月初二', l: '全国' },
   { n: '苗族走亲节', t: '二月初二', l: '贵州' },
   { n: '四印苗族二月桃花节', t: '二月初六', l: '贵州' },
-  { n: '阿昌族泼水节', t: '二月二十九', l: '云南'，img: '/images/5.jpg' },
+  { n: '阿昌族泼水节', t: '二月二十九', l: '云南', img: '/images/5.jpg' },
   { n: '立春节气活动', t: '2月3-5日', l: '全国' },
   { n: '壮族歌圩', t: '春、秋二季', l: '广西' },
   { n: '黎族三月三', t: '三月初三', l: '海南' },
-  { n: '布依族三月三', t: '三月初三', l: '贵州'，img: '/images/113.jpg' },
+  { n: '布依族三月三', t: '三月初三', l: '贵州', img: '/images/113.jpg' },
   { n: '北帝三月三庙会', t: '三月初三前后', l: '广东' },
   { n: '登封中岳庙会', t: '三月初一', l: '河南' },
   { n: '三月三（畲族）', t: '三月初三', l: '浙江' },
@@ -88,7 +88,7 @@ const rawData = [
   { n: '布依族六月六', t: '六月初六', l: '贵州' },
   { n: '满族虫王节', t: '六月初六', l: '全国' },
   { n: '彝族、白族火把节', t: '六月二十四日', l: '云南' },
-  { n: '阿昌族火把节', t: '六月二十五日', l: '云南'，img: '/images/123.jpg' },
+  { n: '阿昌族火把节', t: '六月二十五日', l: '云南', img: '/images/123.jpg' },
   { n: '纳西族三多节', t: '六月二十五日', l: '云南' },
   { n: '哈尼族苦扎扎', t: '农历六月', l: '云南' },
   { n: '藏族雪顿节', t: '农历六月', l: '西藏' },
@@ -107,7 +107,7 @@ const rawData = [
   { n: '蒙古族那达慕', t: '农历六月初四', l: '内蒙古' },
   { n: '甘肃陇南乞巧女儿节', t: '六月二十九至七月初七', l: '甘肃' },
   { n: '苗族上刀梯', t: '农历七月', l: '湖南' },
-  { n: '阿昌族撒神', t: '七月初一', l: '云南'，img: '/images/45.jpg' },
+  { n: '阿昌族撒神', t: '七月初一', l: '云南', img: '/images/45.jpg' },
   { n: '中元节', t: '七月初一至十五', l: '全国' },
   { n: '七夕节', t: '七月初七', l: '全国' },
   { n: '白族石宝山歌会', t: '农历七月下旬', l: '云南' },
@@ -120,7 +120,7 @@ const rawData = [
   { n: '苗族吃新节 (秋季)', t: '农历八月', l: '贵州' },
   { n: '中秋节', t: '八月十五', l: '全国' },
   { n: '白族渔潭会', t: '八月十五', l: '云南' },
-  { n: '阿昌族尝新节', t: '八月十五', l: '云南'，img: '/images/55.jpg' },
+  { n: '阿昌族尝新节', t: '八月十五', l: '云南', img: '/images/55.jpg' },
   { n: '蒙古族马奶节', t: '农历八月', l: '内蒙古' },
   { n: '朝鲜族百种节（八月）', t: '农历八月', l: '吉林' },
   { n: '藏族沐浴节（八月）', t: '农历八月', l: '西藏' },
@@ -129,7 +129,7 @@ const rawData = [
   { n: '山西尉村跑鼓车', t: '农历九月', l: '山西' },
   { n: '山西独辕四景车赛会', t: '农历九月', l: '山西' },
   { n: '浙江径山茶宴', t: '农历九月', l: '浙江' },
-  { n: '青海德都蒙古全席', t: '农历九月', l: '青海'，img: '/images/65.jpg' },
+  { n: '青海德都蒙古全席', t: '农历九月', l: '青海', img: '/images/65.jpg' },
   { n: '京族哈节', t: '农历九月', l: '广西' },
   { n: '布依族查白歌节', t: '农历九月', l: '贵州' },
   { n: '塔吉克族引水节和播种节', t: '农历九月', l: '新疆' },
@@ -209,10 +209,11 @@ const CHINESE_MONTH_MAP: Record<string, number> = {
 };
 
 export const getMonthFromLunar = (date: string): number => {
+  if (date.includes('春节') || date.includes('正')) return 1;
   for (const [key, value] of Object.entries(CHINESE_MONTH_MAP)) {
     if (date.includes(key)) return value;
   }
-  // 处理公历月份和藏历等
+  // 匹配数字月份
   if (date.includes('1月')) return 1;
   if (date.includes('2月')) return 2;
   if (date.includes('3月')) return 3;
@@ -226,7 +227,9 @@ export const getMonthFromLunar = (date: string): number => {
   if (date.includes('11月')) return 11;
   if (date.includes('12月')) return 12;
   if (date.includes('藏历正月')) return 1;
-  return 1; // Default
+const match = date.match(/(\d+)月/);
+  if (match) return parseInt(match[1]);
+  return 1;
 };
 
 const FOLKLORE_DESCRIPTIONS: Record<string, string> = {
@@ -375,34 +378,26 @@ const FOLKLORE_DESCRIPTIONS: Record<string, string> = {
 
 // 将原始数据补充至 184 条。对于重复的节日名称，我们在描述中加入其地域特色
 const generateFolkloreData = (): Folklore[] => {
-  const data: Folklore[] = [];
-  for (let i = 0; i < 184; i++) {
-    const raw = rawData[i % rawData.length];
+  return rawData.map((raw, i) => {
     const region = (raw.l.split(/[族、]/)[0] || '全国').replace('地区', '');
     const baseCoords = COORDS_MAP[region] || COORDS_MAP['全国'];
     const [lat, lng] = getCoords(region, baseCoords);
     const month = getMonthFromLunar(raw.t);
 
-    // Image Keyword Mapping for better relevance
-    const getFolkloreImage = (name: string, index: number) => {
-      // Direct call to our backend proxy which scrapes Baidu Baike
-      return `/api/baidu-baike-image?q=${encodeURIComponent(name)}`;
-    };
-    
-    data.push({
+return {
       id: i + 1,
-      name: i < rawData.length ? raw.n : `${raw.n} (系列活动 ${i - rawData.length + 1})`,
+      name: raw.n,
       month,
       date: raw.t,
       loc: raw.l,
       lat,
       lng,
-      desc: FOLKLORE_DESCRIPTIONS[raw.n] || `${raw.l}的传统民俗活动：${raw.n}。这是中华文化多姿多彩的体现，承载着人们对美好生活的祈愿与传承。`,
-      img: getFolkloreImage(raw.n, i),
-      video: i === 0 ? 'https://www.youtube.com/embed/n7_rNoU0wYQ' : undefined // 仅为春节保留一个演示视频
-    });
-  }
-  return data;
+      desc: FOLKLORE_DESCRIPTIONS[raw.n] || `${raw.l}的传统民俗活动：${raw.n}。这是中华文化多姿多彩的体现。`,
+      // 这里的逻辑会直接匹配你 GitHub 仓库里 public/images 文件夹下的图片
+      img: raw.img || `/images/${i + 1}.jpg`, 
+      video: i === 0 ? 'https://www.youtube.com/embed/n7_rNoU0wYQ' : undefined
+    };
+  });
 };
 
 export const folkloreData: Folklore[] = generateFolkloreData();
