@@ -354,7 +354,7 @@ export default function App() {
                 </div>
 
                 <h2 className="text-4xl font-serif font-bold text-white tracking-tight leading-tight mb-6">
-                  {selectedFolklore.n}
+                  {selectedFolklore.name}
                 </h2>
                 
                 <div className="flex flex-wrap gap-3 mb-10">
@@ -385,7 +385,7 @@ export default function App() {
                         className="w-full h-full"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
-                        title={selectedFolklore.n}
+                        title={selectedFolklore.name}
                       />
                     </div>
                   )}
