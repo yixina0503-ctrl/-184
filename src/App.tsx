@@ -91,7 +91,11 @@ export default function App() {
     ? folkloreData 
     : folkloreData.filter(f => f.month === activeMonth);
 
-  const allFolklore = [...filteredFolklore, ...userContributions];
+  const filteredContributions = activeMonth === 0 
+  ? userContributions 
+  : userContributions.filter(c => c.month === activeMonth);
+
+const allFolklore = [...filteredFolklore, ...filteredContributions];
 
   const timelineItems = (() => {
     if (folkloreData.length === 0) return [];
