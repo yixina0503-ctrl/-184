@@ -379,25 +379,25 @@ const FOLKLORE_DESCRIPTIONS: Record<string, string> = {
 // 将原始数据补充至 184 条。对于重复的节日名称，我们在描述中加入其地域特色
 const generateFolkloreData = (): Folklore[] => {
   return rawData.map((raw, i) => {
-    const region = (raw.l.split(/[族、]/)[0] || '全国').replace('地区', '');
+    // 修复：添加 raw.l? 保护，防止因缺少地点字段导致的 split 报错
+    const region = (raw.l?.split(/[族、]/)[0] || '全国').replace('地区', '');
+    
     const baseCoords = COORDS_MAP[region] || COORDS_MAP['全国'];
     const [lat, lng] = getCoords(region, baseCoords);
     const month = getMonthFromLunar(raw.t);
 
-return {
+    return {
       id: i + 1,
       name: raw.n,
       month,
       date: raw.t,
-      loc: raw.l,
+      loc: raw.l || '全国', // 修复：如果 l 不存在，给定默认值
       lat,
       lng,
-      desc: FOLKLORE_DESCRIPTIONS[raw.n] || `${raw.l}的传统民俗活动：${raw.n}。这是中华文化多姿多彩的体现。`,
-      // 这里的逻辑会直接匹配你 GitHub 仓库里 public/images 文件夹下的图片
+      desc: FOLKLORE_DESCRIPTIONS[raw.n] || `${raw.l || '全国'}的传统民俗活动：${raw.n}。这是中华文化多姿多彩的体现。`,
       img: raw.img || `/images/${i + 1}.jpg`, 
       video: i === 0 ? 'https://www.youtube.com/embed/n7_rNoU0wYQ' : undefined
     };
   });
 };
-
 export const folkloreData: Folklore[] = generateFolkloreData();
