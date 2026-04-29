@@ -384,7 +384,9 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
                             if (v.includes('youtube.com') || v.includes('youtu.be')) {
                               if (v.includes('/embed/')) return v;
                               const parts = v.split('v=');
-                              const videoId = parts[1] ? parts[1].split('&')[0] : v.split('/').pop()?.split('?')[0];
+                              const videoId = (parts.length > 1) 
+                                  ? parts[1].split('&')[0] 
+                                 : v.split('/').pop()?.split('?')[0];
       
                               return videoId ? `https://www.youtube.com/embed/${videoId}?rel=0` : '';
                            }
