@@ -103,9 +103,9 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
     // Always find next items relative to the full dataset for a better "timeline" feel
     // but prioritize the filtered list if the user is explicitly exploring a month.
     const sourceList = activeMonth === 0 ? folkloreData : allFolklore;
+    if (!sourceList || sourceList.length === 0) return []; 
+
     const currentId = selectedFolklore?.id || sourceList[0]?.id;
-    
-    let currentIndex = sourceList.findIndex(f => f.id === currentId);
     if (currentIndex === -1) currentIndex = 0;
 
     const items = [];
