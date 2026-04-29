@@ -223,7 +223,7 @@ export default function App() {
                         : 'bg-white/5 hover:bg-white/10 text-text-dim hover:text-text-main'
                     }`}
                   >
-                    <div className="text-[11px] font-bold truncate pr-4">{folklore.n}</div>
+                    <div className="text-[11px] font-bold truncate pr-4">{folklore.name}</div>
                     <div className="text-[9px] opacity-60 mt-0.5 flex items-center gap-1">
                       <MapPin size={8} />
                       {folklore.loc}
