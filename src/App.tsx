@@ -188,7 +188,7 @@ export default function App() {
         <div className="bento-card col-span-1 row-span-1 flex flex-col justify-center items-center text-center group">
           <div className="text-3xl font-bold group-hover:text-gold transition-colors">{filteredFolklore.length}</div>
           <div className="text-[10px] uppercase text-text-dim tracking-widest mt-1">
-            {activeMonth === 0 ? '总记录条目' : `${activeMonthData?.n}记录`}
+            {activeMonth === 0 ? '总记录条目' : `${activeMonthData?.name}记录`}
           </div>
           <TrendingUp size={16} className="absolute top-4 right-4 text-white/10" />
         </div>
@@ -198,7 +198,7 @@ export default function App() {
           <div className="flex items-center justify-between mb-4 shrink-0">
             <div className="flex items-center gap-2 text-gold text-[10px] uppercase tracking-widest font-bold">
               <Info size={12} />
-              <span>{activeMonthData?.n}民俗志</span>
+              <span>{activeMonthData?.name}民俗志</span>
             </div>
           </div>
           
