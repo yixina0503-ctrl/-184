@@ -374,14 +374,19 @@ export default function App() {
                       <iframe
                         src={(() => {
                           const v = selectedFolklore.video;
-                          if (!v) return '';
+                          if (!v || typeof v !== 'string') return '';
+  
+                          try {
                           if (v.includes('youtube.com') || v.includes('youtu.be')) {
                             if (v.includes('/embed/')) return v;
                             const videoId = v.split('v=')[1]?.split('&')[0] || v.split('/').pop()?.split('?')[0];
-                            return `https://www.youtube.com/embed/${videoId}?rel=0`;
-                          }
-                          return v;
-                        })()}
+                            return videoId ? `https://www.youtube.com/embed/${videoId}?rel=0` : '';
+                           }
+                         } catch (e) {
+                           return ''; // 捕获任何可能的解析错误
+                         }
+                         return v;
+                       })()}
                         className="w-full h-full"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
