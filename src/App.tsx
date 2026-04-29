@@ -378,19 +378,23 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
                       <iframe
                         src={(() => {
                           const v = selectedFolklore.video;
-                          if (!v || typeof v !== 'string') return '';
-  
+                          if (!v || typeof v !== 'string' || v.trim() === '') return '';
+
                           try {
-                          if (v.includes('youtube.com') || v.includes('youtu.be')) {
-                            if (v.includes('/embed/')) return v;
-                            const videoId = v.split('v=')[1]?.split('&')[0] || v.split('/').pop()?.split('?')[0];
-                            return videoId ? `https://www.youtube.com/embed/${videoId}?rel=0` : '';
+                            if (v.includes('youtube.com') || v.includes('youtu.be')) {
+                              if (v.includes('/embed/')) return v;
+                              const parts = v.split('v=');
+                              const videoId = parts[1] ? parts[1].split('&')[0] : v.split('/').pop()?.split('?')[0];
+      
+                              return videoId ? `https://www.youtube.com/embed/${videoId}?rel=0` : '';
                            }
                          } catch (e) {
-                           return ''; // 捕获任何可能的解析错误
+                           console.error('Video URL parsing error:', e);
+                           return '';
                          }
                          return v;
                        })()}
+                        
                         className="w-full h-full"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
