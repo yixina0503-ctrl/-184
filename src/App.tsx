@@ -331,7 +331,7 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
           >
             <div className="relative h-64 w-full">
               <img 
-                src={item.img || `/images/${item.id}.jpg}
+                src={item.img || `/images/${item.id}.jpg`}
                 alt={selectedFolklore.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
