@@ -250,21 +250,24 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
       <div className="bento-card col-span-3 row-span-1 !p-0 flex overflow-hidden">
         {timelineItems.length > 0 ? (
           <>
+            // 找到这部分代码（约200行）
             {timelineItems.map((item, idx) => (
               <div 
                 key={item.id || idx} 
                 className="relative flex-1 group cursor-pointer overflow-hidden border-r border-white/5"
-                onClick={() => handleSelect(item)} // 增加点击事件
+                onClick={() => handleSelect(item)}
               >
                 <img 
-                  src={selectedFolklore.img || `/images/${selectedFolklore.id}.jpg`} 
-                  alt={selectedFolklore.name}
+                  src={item.img || `/images/${item.id}.jpg`} 
+                  alt={item.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop';
                   }}
                />
                {/* 
+             </div>
+           ))}
                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                <div className="relative h-full p-4 flex flex-col justify-between z-10">
                  <span className={`text-[10px] font-bold uppercase tracking-widest ${idx === 0 ? 'text-accent' : 'text-text-dim'}`}>
