@@ -98,16 +98,14 @@ export default function App() {
 const allFolklore = [...filteredFolklore, ...filteredContributions];
 
     const timelineItems = (() => {
-    if (folkloreData.length === 0) return [];
-    
-    const sourceList = activeMonth === 0 ? folkloreData : allFolklore;
-    if (!sourceList || sourceList.length === 0) return []; 
-
+    const sourceList = allFolklore;
+      
+    if (sourceList.length === 0) return [];
+      
     const currentIndex = selectedFolklore 
       ? sourceList.findIndex(f => f.id === selectedFolklore.id) 
       : 0;
 
-    // 如果找不到（findIndex 返回 -1），则回退到 0
     const safeIndex = currentIndex === -1 ? 0 : currentIndex;
 
     const items = [];
