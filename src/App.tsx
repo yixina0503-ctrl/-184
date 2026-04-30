@@ -255,7 +255,7 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
             {timelineItems.map((item, idx) => (
               <div key={item.id || idx} ...>
                 <img 
-                  src={item.img || `/images/${item.id}.jpg`} 
+                  src={selectedFolklore.img || `/images/${selectedFolklore.id}.jpg`}
                   className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
                   alt={item.name}
                   onError={(e) => {
