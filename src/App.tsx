@@ -325,21 +325,15 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
       {/* Detail View Overlay (Side Panel) */}
       <AnimatePresence>
         {selectedFolklore && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 bottom-0 z-[9999] w-full md:w-[500px] bg-[#121214]/98 backdrop-blur-2xl border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] flex flex-col"
-          >
-            <div className="relative h-64 w-full">
-              <img 
-                src={item.img || `/images/${item.id}.jpg`}
-                alt={selectedFolklore.name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop';
-                }}
+          <motion.div ... >
+             <div className="relative h-64 w-full">
+                <img 
+                  src={selectedFolklore.img || `/images/${selectedFolklore.id}.jpg`}
+                  alt={selectedFolklore.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop';
+                  }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
               <button 
