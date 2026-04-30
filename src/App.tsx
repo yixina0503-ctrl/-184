@@ -256,13 +256,13 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
                 className="relative flex-1 group cursor-pointer overflow-hidden border-r border-white/5"
                 onClick={() => handleSelect(item)} // 增加点击事件
               >
-               <img 
-                 src={selectedFolklore.img || `/images/${selectedFolklore.id}.jpg`}
-                 className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
-                 alt={item.name}
-                 onError={(e) => {
-                   (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400';
-                 }}
+                <img 
+                  src={selectedFolklore.img || `/images/${selectedFolklore.id}.jpg`} 
+                  alt={selectedFolklore.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop';
+                  }}
                />
                {/* 
                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
