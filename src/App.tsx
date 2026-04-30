@@ -253,32 +253,36 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
         {timelineItems.length > 0 ? (
           <>
             {timelineItems.map((item, idx) => (
-              <div key={item.id || idx} ...>
-                <img 
-                  src={selectedFolklore.img || `/images/${selectedFolklore.id}.jpg`}
-                  className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
-                  alt={item.name}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400';
-                  }}
-                />
-                {/* 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="relative h-full p-4 flex flex-col justify-between z-10">
-                  <span className={`text-[10px] font-bold uppercase tracking-widest ${idx === 0 ? 'text-accent' : 'text-text-dim'}`}>
-                    {idx === 0 ? 'NOW' : idx === 1 ? 'UP NEXT' : 'LATER'}
-                  </span>
-                  <div>
-                    <div className="text-lg font-bold group-hover:text-gold transition-colors leading-tight">
-                      {item.date}
-                    </div>
-                    <div className="text-[10px] text-text-dim truncate mt-1">
-                      {item.name}
-                    </div>
-                  </div>
-                </div>
+              <div 
+                key={item.id || idx} 
+                className="relative flex-1 group cursor-pointer overflow-hidden border-r border-white/5"
+                onClick={() => handleSelect(item)} // 增加点击事件
+              >
+               <img 
+                 src={item.img || `/images/${item.id}.jpg`} 
+                 className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
+                 alt={item.name}
+                 onError={(e) => {
+                   (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400';
+                 }}
+               />
+               {/* 
+               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+               <div className="relative h-full p-4 flex flex-col justify-between z-10">
+                 <span className={`text-[10px] font-bold uppercase tracking-widest ${idx === 0 ? 'text-accent' : 'text-text-dim'}`}>
+                   {idx === 0 ? 'NOW' : idx === 1 ? 'UP NEXT' : 'LATER'}
+                 </span>
+                 <div>
+                   <div className="text-lg font-bold group-hover:text-gold transition-colors leading-tight">
+                     {item.date}
+                   </div>
+                   <div className="text-[10px] text-text-dim truncate mt-1">
+                     {item.name}
+                   </div>
+                 </div>
               </div>
-            ))}
+           </div>
+         ))}
           </>
         ) : (
           <div className="flex-grow flex items-center justify-center text-text-dim text-xs uppercase tracking-widest">
