@@ -259,7 +259,7 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
                 className={`flex-1 relative group cursor-pointer overflow-hidden ${idx < 2 ? 'border-r border-white/10' : ''}`}
               >
                 <img 
-                  src={`/images/${idx + 1}.jpg`} 
+                  src={selectedFolklore.img || `/images/${selectedFolklore.id}.jpg}
                   className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500"
                   alt={item.name}
                   onError={(e) => {
@@ -332,7 +332,7 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
           >
             <div className="relative h-64 w-full">
               <img 
-                src={`/images/${selectedFolklore.id}.jpg`}
+                src={item.img || `/images/${item.id}.jpg}
                 alt={selectedFolklore.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
