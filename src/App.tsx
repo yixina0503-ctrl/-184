@@ -247,26 +247,49 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
         </div>
 
 {/* Timeline / Gallery Card */}
-      <div className="bento-card col-span-3 row-span-1 !p-0 flex overflow-hidden">
-        {timelineItems.length > 0 ? (
-          <>
-            // 找到这部分代码（约200行）
-            {timelineItems.map((item, idx) => (
-              <div 
-                key={item.id || idx} 
-                className="relative flex-1 group cursor-pointer overflow-hidden border-r border-white/5"
-                onClick={() => handleSelect(item)}
-              >
-                <img 
-                  src={item.img || `/images/${item.id}.jpg`} 
-                  alt={item.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop';
-                  }}
-               />
-               {/* 
-             </div>
+<div className="bento-card col-span-3 row-span-1 !p-0 flex overflow-hidden">
+  {timelineItems.length > 0 ? (
+    <div className="flex w-full h-full"> {/* 增加一个容器包裹 map */}
+      {timelineItems.map((item, idx) => (
+        <div 
+          key={item.id || idx} 
+          className="relative flex-1 group cursor-pointer overflow-hidden border-r border-white/5"
+          onClick={() => handleSelect(item)}
+        >
+          <img 
+            src={item.img || `/images/${item.id}.jpg`} 
+            alt={item.name}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop';
+            }}
+          />
+          {/* 渐变遮罩层 */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+          
+          {/* 文字内容 */}
+          <div className="absolute inset-0 p-4 flex flex-col justify-between z-10">
+            <span className={`text-[10px] font-bold uppercase tracking-widest ${idx === 0 ? 'text-gold' : 'text-text-dim'}`}>
+              {idx === 0 ? 'NOW' : idx === 1 ? 'UP NEXT' : 'LATER'}
+            </span>
+            <div>
+              <div className="text-lg font-bold group-hover:text-gold transition-colors leading-tight">
+                {item.date}
+              </div>
+              <div className="text-[10px] text-text-dim truncate mt-1">
+                {item.name}
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className="flex-grow flex items-center justify-center text-text-dim text-xs uppercase tracking-widest">
+      暂无活动排期
+    </div>
+  )}
+</div>
            ))}
                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                <div className="relative h-full p-4 flex flex-col justify-between z-10">
