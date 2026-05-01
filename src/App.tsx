@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FolkloreMap } from './components/FolkloreMap';
 import { folkloreData } from './constants';
@@ -26,55 +26,46 @@ const months = [
 ];
 
 export default function App() {
-  console.log('App rendering, data count:', folkloreData.length);
   const [activeMonth, setActiveMonth] = useState(0);
   const [selectedFolklore, setSelectedFolklore] = useState<Folklore | null>(null);
   const [userContributions, setUserContributions] = useState<UserContribution[]>([]);
   const [showContributionForm, setShowContributionForm] = useState(false);
   const [user, setUser] = useState<any>(null);
 
+  // Auth 监听
   useEffect(() => {
     if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-    });
+    const unsubscribe = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsubscribe();
   }, []);
 
+  // 数据同步逻辑
   useEffect(() => {
-    const loadLocal = () => {
-      const localSaved = localStorage.getItem('local_contributions');
-      if (localSaved) {
-        try {
-          const parsed = JSON.parse(localSaved);
-          setUserContributions(prev => {
-            // If we have firestore data, we might want to blend them
-            // For simplicity, just use local if no DB, or merge
-            return [...parsed];
-          });
-        } catch (e) {
-          console.error('Error parsing local contributions', e);
-        }
+    // 1. 加载本地缓存
+    const localSaved = localStorage.getItem('local_contributions');
+    if (localSaved) {
+      try {
+        setUserContributions(JSON.parse(localSaved));
+      } catch (e) {
+        console.error('Local data parse error', e);
       }
-    };
-
-    loadLocal();
-    window.addEventListener('storage', loadLocal);
+    }
 
     if (!db) return;
 
+    // 2. 监听 Firestore 实时更新
     const q = query(collection(db, 'contributions'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const contributions = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as UserContribution[];
-      
-      // Update local storage with what we got from server
       setUserContributions(contributions);
+      localStorage.setItem('local_contributions', JSON.stringify(contributions));
     }, (error) => {
-      console.warn('Firestore subscription failed (likely permissions):', error);
+      console.warn('Firestore subscription failed:', error);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -82,48 +73,44 @@ export default function App() {
     setSelectedFolklore(folklore);
   }, []);
 
-  const handleReset = () => {
-    setSelectedFolklore(null);
-  };
+  const handleReset = () => setSelectedFolklore(null);
 
-  const activeMonthData = months.find(m => m.id === activeMonth);
-  const filteredFolklore = activeMonth === 0 
-    ? folkloreData 
-    : folkloreData.filter(f => f.month === activeMonth);
+  // 性能优化：合并数据
+  const allFolklore = useMemo(() => {
+    const filteredBase = activeMonth === 0 
+      ? folkloreData 
+      : folkloreData.filter(f => f.month === activeMonth);
+    
+    const filteredUser = activeMonth === 0 
+      ? userContributions 
+      : userContributions.filter(c => c.month === activeMonth);
 
-  const filteredContributions = activeMonth === 0 
-  ? userContributions 
-  : userContributions.filter(c => c.month === activeMonth);
+    return [...filteredBase, ...filteredUser];
+  }, [activeMonth, userContributions]);
 
-const allFolklore = [...filteredFolklore, ...filteredContributions];
-
-    const timelineItems = (() => {
-    const sourceList = allFolklore;
-      
-    if (sourceList.length === 0) return [];
-      
+  // 性能优化：生成时间轴项目
+  const timelineItems = useMemo(() => {
+    if (allFolklore.length === 0) return [];
     const currentIndex = selectedFolklore 
-      ? sourceList.findIndex(f => f.id === selectedFolklore.id) 
+      ? allFolklore.findIndex(f => f.id === selectedFolklore.id) 
       : 0;
-
     const safeIndex = currentIndex === -1 ? 0 : currentIndex;
 
-    const items = [];
-    for (let i = 0; i < 3; i++) {
-      const index = (safeIndex + i) % sourceList.length;
-      if (sourceList[index]) {
-        items.push(sourceList[index]);
-      }
-    }
-    return items;
-  })();
+    return [0, 1, 2].map(offset => {
+      const index = (safeIndex + offset) % allFolklore.length;
+      return allFolklore[index];
+    });
+  }, [allFolklore, selectedFolklore]);
+
+  const activeMonthData = months.find(m => m.id === activeMonth);
 
   return (
     <div className="fixed inset-0 bg-[#0D0D0F] text-[#F1F1F1] font-sans p-6 flex flex-col gap-6 overflow-hidden">
+      {/* 运行状态悬浮条 */}
       <div className="absolute top-2 right-2 text-[10px] text-gold z-[100] bg-black/50 px-2 py-1 rounded">
-        系统运行中 | 数据: {folkloreData.length} | 月份: {activeMonthData?.name}
+        系统运行中 | 数据: {allFolklore.length} | 月份: {activeMonthData?.name}
       </div>
-      {/* Header */}
+
       <header className="flex justify-between items-center shrink-0">
         <div className="brand">
           <h1 className="font-serif text-3xl tracking-widest text-gold">華夏民俗志</h1>
@@ -135,353 +122,196 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
         </div>
       </header>
 
-      {/* Bento Grid */}
       <main className="grid grid-cols-4 grid-rows-4 gap-4 flex-grow relative min-h-0 border border-white/5 rounded-3xl">
         
-        {/* Hero Map Card */}
-        <div className="bento-card col-span-3 row-span-3 !p-0 bg-[#020205] flex flex-col overflow-hidden">
-          <div className="absolute top-4 left-4 z-[1000] flex items-center gap-2 text-gold/60 text-[10px] uppercase tracking-widest font-medium pointer-events-none">
+        {/* 地图卡片 */}
+        <div className="bento-card col-span-3 row-span-3 !p-0 bg-[#020205] flex flex-col overflow-hidden relative">
+          <div className="absolute top-4 left-4 z-10 flex items-center gap-2 text-gold/60 text-[10px] uppercase tracking-widest font-medium pointer-events-none">
             <Globe size={12} />
             <span>華夏地理圖誌</span>
           </div>
-          
-          <div className="flex-grow relative overflow-hidden">
+          <div className="flex-grow relative">
             <FolkloreMap 
               activeMonth={activeMonth} 
               onSelect={handleSelect} 
               selectedId={selectedFolklore?.id} 
-              folkloreData={allFolklore} // 确保这里使用了合并后的数据
+              folkloreData={allFolklore} 
             />
           </div>
-
-          <div className="p-4 bg-black/20 backdrop-blur-sm border-t border-border flex justify-between items-center shrink-0">
+          <div className="p-4 bg-black/20 backdrop-blur-sm border-t border-border flex justify-between items-center">
             <div className="text-xs text-gold/80">当前聚焦：{selectedFolklore ? selectedFolklore.loc : '全国范围'}</div>
-            <div className="flex gap-4 text-[10px] text-text-dim uppercase tracking-tighter">
-              <span>Left Click: Select</span>
+            <div className="flex gap-4 text-[10px] text-text-dim uppercase">
+              <span>Click: Select</span>
               <span>Scroll: Zoom</span>
             </div>
           </div>
         </div>
 
-        {/* Feature / Month Filter Card */}
-        <div className="bento-card col-span-1 row-span-1 bg-gradient-to-br from-[#2A1A1A] to-card flex flex-col gap-3">
-          <div className="flex items-center justify-between shrink-0">
+        {/* 月份筛选器 */}
+        <div className="bento-card col-span-1 row-span-1 bg-gradient-to-br from-[#2A1A1A] to-card flex flex-col gap-3 overflow-hidden">
+          <div className="flex items-center justify-between">
             <div className="text-[10px] text-gold uppercase tracking-widest font-bold">岁时节令</div>
             <div className="text-[10px] text-text-dim">{activeMonthData?.en}</div>
           </div>
-          <div className="flex-grow overflow-y-auto no-scrollbar">
-            <div className="grid grid-cols-2 gap-1.5">
-              {months.map((month) => (
-                <button
-                  key={month.id}
-                  onClick={() => setActiveMonth(month.id)}
-                  className={`px-2 py-1.5 rounded-lg text-[10px] font-medium transition-all duration-300 ${
-                    activeMonth === month.id 
-                      ? 'bg-gold text-bg' 
-                      : 'bg-white/5 text-text-dim hover:text-text-main hover:bg-white/10'
-                  }`}
-                >
-                  {month.name}
-                </button>
-              ))}
-            </div>
+          <div className="flex-grow overflow-y-auto no-scrollbar grid grid-cols-2 gap-1.5">
+            {months.map((month) => (
+              <button
+                key={month.id}
+                onClick={() => setActiveMonth(month.id)}
+                className={`px-2 py-1.5 rounded-lg text-[10px] font-medium transition-all ${
+                  activeMonth === month.id 
+                    ? 'bg-gold text-bg' 
+                    : 'bg-white/5 text-text-dim hover:bg-white/10'
+                }`}
+              >
+                {month.name}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Stats Card 1 */}
-        <div className="bento-card col-span-1 row-span-1 flex flex-col justify-center items-center text-center group">
-          <div className="text-3xl font-bold group-hover:text-gold transition-colors">{filteredFolklore.length}</div>
+        {/* 统计卡片 */}
+        <div className="bento-card col-span-1 row-span-1 flex flex-col justify-center items-center text-center group relative">
+          <div className="text-3xl font-bold group-hover:text-gold transition-colors">{allFolklore.length}</div>
           <div className="text-[10px] uppercase text-text-dim tracking-widest mt-1">
             {activeMonth === 0 ? '总记录条目' : `${activeMonthData?.name}记录`}
           </div>
           <TrendingUp size={16} className="absolute top-4 right-4 text-white/10" />
         </div>
 
-        {/* Folklore List Card */}
+        {/* 民俗列表 */}
         <div className="bento-card col-span-1 row-span-2 flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between mb-4 shrink-0">
-            <div className="flex items-center gap-2 text-gold text-[10px] uppercase tracking-widest font-bold">
-              <Info size={12} />
-              <span>{activeMonthData?.name}民俗志</span>
-            </div>
+          <div className="flex items-center gap-2 text-gold text-[10px] uppercase tracking-widest font-bold mb-4">
+            <Info size={12} />
+            <span>{activeMonthData?.name}民俗志</span>
           </div>
-          
-          <div className="flex-grow overflow-y-auto no-scrollbar pr-1">
-            <div className="flex flex-col gap-2">
+          <div className="flex-grow overflow-y-auto no-scrollbar space-y-2">
+            <button
+              onClick={() => setShowContributionForm(true)}
+              className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-gold/10 border border-gold/20 text-gold hover:bg-gold/20 transition-all group"
+            >
+              <Plus size={16} className="group-hover:rotate-90 transition-transform" />
+              <span className="text-[10px] font-bold uppercase">标记新民俗</span>
+            </button>
+            {allFolklore.map((f) => (
               <button
-                onClick={() => setShowContributionForm(true)}
-                className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-gold/10 border border-gold/20 text-gold hover:bg-gold/20 transition-all mb-2 group"
+                key={f.id}
+                onClick={() => handleSelect(f)}
+                className={`w-full text-left p-2.5 rounded-xl transition-all ${
+                  selectedFolklore?.id === f.id ? 'bg-accent text-white' : 'bg-white/5 hover:bg-white/10 text-text-dim'
+                }`}
               >
-                <Plus size={16} className="group-hover:rotate-90 transition-transform" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">标记新民俗</span>
-              </button>
-
-              {allFolklore.length > 0 ? (
-                allFolklore.map((folklore) => (
-                  <button
-                    key={folklore.id}
-                    onClick={() => handleSelect(folklore)}
-                    className={`text-left p-2.5 rounded-xl transition-all duration-300 group relative overflow-hidden ${
-                      selectedFolklore?.id === folklore.id
-                        ? 'bg-accent text-white'
-                        : 'bg-white/5 hover:bg-white/10 text-text-dim hover:text-text-main'
-                    }`}
-                  >
-                    <div className="text-[11px] font-bold truncate pr-4">{folklore.name}</div>
-                    <div className="text-[9px] opacity-60 mt-0.5 flex items-center gap-1">
-                      <MapPin size={8} />
-                      {folklore.loc}
-                      {folklore.isUserContribution && (
-                        <span className="ml-auto bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded text-[7px] uppercase">User</span>
-                      )}
-                    </div>
-                  </button>
-                ))
-              ) : (
-                <div className="text-center py-10 text-text-dim text-[10px]">
-                  暂无记录
+                <div className="text-[11px] font-bold truncate">{f.name}</div>
+                <div className="text-[9px] opacity-60 flex items-center gap-1 mt-0.5">
+                  <MapPin size={8} /> {f.loc}
                 </div>
-              )}
-            </div>
+              </button>
+            ))}
           </div>
         </div>
 
-{/* Timeline / Gallery Card */}
-<div className="bento-card col-span-3 row-span-1 !p-0 flex overflow-hidden">
-  {timelineItems.length > 0 ? (
-    <div className="flex w-full h-full"> {/* 增加一个容器包裹 map */}
-      {timelineItems.map((item, idx) => (
-        <div 
-          key={item.id || idx} 
-          className="relative flex-1 group cursor-pointer overflow-hidden border-r border-white/5"
-          onClick={() => handleSelect(item)}
-        >
-          <img 
-            src={item.img || `/images/${item.id}.jpg`} 
-            alt={item.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop';
-            }}
-          />
-          {/* 渐变遮罩层 */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-          
-          {/* 文字内容 */}
-          <div className="absolute inset-0 p-4 flex flex-col justify-between z-10">
-            <span className={`text-[10px] font-bold uppercase tracking-widest ${idx === 0 ? 'text-gold' : 'text-text-dim'}`}>
-              {idx === 0 ? 'NOW' : idx === 1 ? 'UP NEXT' : 'LATER'}
-            </span>
-            <div>
-              <div className="text-lg font-bold group-hover:text-gold transition-colors leading-tight">
-                {item.date}
-              </div>
-              <div className="text-[10px] text-text-dim truncate mt-1">
-                {item.name}
-              </div>
+        {/* 时间轴/画廊项目 */}
+        <div className="bento-card col-span-3 row-span-1 !p-0 flex overflow-hidden">
+          {timelineItems.length > 0 ? (
+            <div className="flex w-full h-full">
+              {timelineItems.map((item, idx) => (
+                <div 
+                  key={`${item.id}-${idx}`} 
+                  className="relative flex-1 group cursor-pointer overflow-hidden border-r border-white/5"
+                  onClick={() => handleSelect(item)}
+                >
+                  <img 
+                    src={item.img || `/images/${item.id}.jpg`} 
+                    alt={item.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    onError={(e) => { (e.currentTarget.src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop') }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 p-4 flex flex-col justify-between z-10">
+                    <span className={`text-[10px] font-bold uppercase tracking-widest ${idx === 0 ? 'text-gold' : 'text-text-dim'}`}>
+                      {idx === 0 ? 'NOW' : idx === 1 ? 'UP NEXT' : 'LATER'}
+                    </span>
+                    <div>
+                      <div className="text-lg font-bold group-hover:text-gold transition-colors">{item.date}</div>
+                      <div className="text-[10px] text-text-dim truncate">{item.name}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          ) : (
+            <div className="flex-grow flex items-center justify-center text-text-dim text-xs uppercase">暂无活动排期</div>
+          )}
         </div>
-      ))}
-    </div>
-  ) : (
-    <div className="flex-grow flex items-center justify-center text-text-dim text-xs uppercase tracking-widest">
-      暂无活动排期
-    </div>
-  )}
-</div>
-           ))}
-               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-               <div className="relative h-full p-4 flex flex-col justify-between z-10">
-                 <span className={`text-[10px] font-bold uppercase tracking-widest ${idx === 0 ? 'text-accent' : 'text-text-dim'}`}>
-                   {idx === 0 ? 'NOW' : idx === 1 ? 'UP NEXT' : 'LATER'}
-                 </span>
-                 <div>
-                   <div className="text-lg font-bold group-hover:text-gold transition-colors leading-tight">
-                     {item.date}
-                   </div>
-                   <div className="text-[10px] text-text-dim truncate mt-1">
-                     {item.name}
-                   </div>
-                 </div>
-              </div>
-           </div>
-         ))}
-          </>
-        ) : (
-          <div className="flex-grow flex items-center justify-center text-text-dim text-xs uppercase tracking-widest">
-            暂无活动排期
-          </div>
-        )}
-      </div>
 
-        {/* Reset View Button Overlay */}
+        {/* 重置视图按钮 */}
         <AnimatePresence>
           {selectedFolklore && (
             <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
               onClick={handleReset}
-              className="absolute top-4 right-4 z-30 flex items-center gap-2 bg-red-600/90 hover:bg-red-600 text-white px-4 py-2 rounded-full text-[10px] font-bold shadow-lg transition-colors group"
+              className="absolute top-4 right-4 z-30 flex items-center gap-2 bg-red-600/90 hover:bg-red-600 text-white px-4 py-2 rounded-full text-[10px] font-bold shadow-lg"
             >
-              <RotateCcw size={12} className="group-hover:rotate-[-45deg] transition-transform" />
-              重置视角
+              <RotateCcw size={12} /> 重置视角
             </motion.button>
           )}
         </AnimatePresence>
-
       </main>
 
-      {/* Contribution Form Modal */}
+      {/* 贡献表单弹窗 */}
       <AnimatePresence>
         {showContributionForm && (
-          <ContributionForm 
-            onClose={() => setShowContributionForm(false)} 
-            onSuccess={() => {
-              // Optional: show success toast
-            }}
-          />
+          <ContributionForm onClose={() => setShowContributionForm(false)} />
         )}
       </AnimatePresence>
 
-      {/* Detail View Overlay (Side Panel) */}
+      {/* 详情侧边栏 */}
       <AnimatePresence>
         {selectedFolklore && (
           <motion.div 
-           initial={{ x: '100%' }}
-           animate={{ x: 0 }}
-           exit={{ x: '100%' }}
-           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-           className="fixed top-0 right-0 h-full w-full md:w-[450px] bg-[#0A0A0C] border-l border-white/10 z-[200] shadow-2xl flex flex-col"
+            initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed top-0 right-0 h-full w-full md:w-[450px] bg-[#0A0A0C] border-l border-white/10 z-[200] shadow-2xl flex flex-col"
           >
-                <img 
-                  src={selectedFolklore.img || `/images/${selectedFolklore.id}.jpg`}
-                  alt={selectedFolklore.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop';
-                  }}
+            <div className="h-64 relative shrink-0">
+              <img 
+                src={selectedFolklore.img || `/images/${selectedFolklore.id}.jpg`}
+                className="w-full h-full object-cover"
+                onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop' }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-              <button 
-                onClick={() => setSelectedFolklore(null)}
-                className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/80 rounded-full transition-colors"
-              >
-                <X size={20} />
-              </button>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0C] to-transparent" />
+              <button onClick={() => setSelectedFolklore(null)} className="absolute top-4 right-4 p-2 bg-black/50 rounded-full"><X size={20}/></button>
             </div>
 
-            <div className="p-10 flex-grow overflow-y-auto no-scrollbar">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-[1px] w-8 bg-gold" />
-                  <span className="text-gold text-[10px] uppercase tracking-[0.3em] font-bold">民俗档案</span>
-                </div>
+            <div className="p-8 flex-grow overflow-y-auto no-scrollbar">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-[1px] w-8 bg-gold" />
+                <span className="text-gold text-[10px] uppercase tracking-widest font-bold">民俗档案</span>
+              </div>
+              <h2 className="text-3xl font-serif font-bold mb-6">{selectedFolklore.name}</h2>
+              
+              <div className="flex gap-3 mb-8">
+                <span className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg text-xs"><MapPin size={12} />{selectedFolklore.loc}</span>
+                <span className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg text-xs"><Calendar size={12} />{selectedFolklore.date}</span>
+              </div>
 
-                <h2 className="text-4xl font-serif font-bold text-white tracking-tight leading-tight mb-6">
-                  {selectedFolklore.name}
-                </h2>
-                
-                <div className="flex flex-wrap gap-3 mb-10">
-                  <span className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-xs text-text-main">
-                    <MapPin size={14} className="text-accent" />
-                    {selectedFolklore.loc}
-                  </span>
-                  <span className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-xs text-text-main">
-                    <Calendar size={14} className="text-accent" />
-                    {selectedFolklore.date}
-                  </span>
-                </div>
-
-                <div className="space-y-6">
-                  {selectedFolklore.video && (
-                    <div className="mb-8 rounded-2xl overflow-hidden border border-white/10 bg-black aspect-video">
-                      <iframe
-                        src={(() => {
-                          const v = selectedFolklore.video;
-                          if (!v || typeof v !== 'string' || v.trim() === '') return '';
-
-                          try {
-                            if (v.includes('youtube.com') || v.includes('youtu.be')) {
-                              if (v.includes('/embed/')) return v;
-                              const parts = v.split('v=');
-                              const videoId = (parts.length > 1) 
-                                  ? parts[1].split('&')[0] 
-                                  : v.split('/').pop()?.split('?')[0];
-      
-                              return videoId ? `https://www.youtube.com/embed/${videoId}?rel=0` : '';
-                           }
-                         } catch (e) {
-                           console.error('Video URL parsing error:', e);
-                           return '';
-                         }
-                         return v;
-                       })()}
-                        
-                        className="w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        title={selectedFolklore.name}
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-4">
-                    <div className="text-gold/40 text-[10px] uppercase tracking-[0.2em] font-bold whitespace-nowrap">文化概览</div>
-                    <div className="h-[1px] flex-grow bg-white/5" />
+              <div className="space-y-6 text-text-main/80 leading-relaxed">
+                {selectedFolklore.video && (
+                  <div className="rounded-xl overflow-hidden aspect-video bg-black border border-white/10">
+                    <iframe className="w-full h-full" src={selectedFolklore.video} allowFullScreen />
                   </div>
-                  <p className="text-text-main/90 leading-relaxed text-lg font-light first-letter:text-3xl first-letter:font-serif first-letter:text-gold first-letter:mr-1">
-                    {selectedFolklore.desc}
-                  </p>
-                </div>
-
-                <div className="mt-16 grid grid-cols-2 gap-4">
-                  <button className="bg-gold text-bg py-4 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-white transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-gold/10">
-                    <Info size={16} />
-                    深入探索
-                  </button>
-                  <button className="bg-white/5 border border-white/10 text-white py-4 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-2">
-                    <RotateCcw size={16} />
-                    收藏记录
-                  </button>
-                </div>
-                
-                <div className="h-20" />
-              </motion.div>
-            </div>
-            
-            <div className="p-8 border-t border-white/5 bg-black/40 backdrop-blur-md flex items-center justify-between">
-              <span className="text-[10px] text-text-dim uppercase tracking-widest">非物质文化遗产保护项目</span>
-              <div className="flex gap-2">
-                <div className="w-1 h-1 rounded-full bg-gold" />
-                <div className="w-1 h-1 rounded-full bg-gold/50" />
-                <div className="w-1 h-1 rounded-full bg-gold/20" />
+                )}
+                <p className="first-letter:text-3xl first-letter:text-gold first-letter:font-serif">{selectedFolklore.desc}</p>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Footer */}
       <footer className="flex justify-between items-center shrink-0 text-[10px] text-text-dim uppercase tracking-widest">
         <div className="flex gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_8px_rgba(230,57,70,0.6)]" />
-            <span>岁时节令</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-gold shadow-[0_0_8px_rgba(212,175,55,0.6)]" />
-            <span>传统技艺</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
-            <span>民间文学</span>
-          </div>
+          <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-accent" /> 岁时节令</span>
+          <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-gold" /> 传统技艺</span>
         </div>
         <div>数据更新至：癸卯年 臘月廿四</div>
       </footer>
