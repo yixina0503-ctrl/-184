@@ -348,8 +348,13 @@ const allFolklore = [...filteredFolklore, ...filteredContributions];
       {/* Detail View Overlay (Side Panel) */}
       <AnimatePresence>
         {selectedFolklore && (
-          <motion.div ... >
-             <div className="relative h-64 w-full">
+          <motion.div 
+           initial={{ x: '100%' }}
+           animate={{ x: 0 }}
+           exit={{ x: '100%' }}
+           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+           className="fixed top-0 right-0 h-full w-full md:w-[450px] bg-[#0A0A0C] border-l border-white/10 z-[200] shadow-2xl flex flex-col"
+          >
                 <img 
                   src={selectedFolklore.img || `/images/${selectedFolklore.id}.jpg`}
                   alt={selectedFolklore.name}
