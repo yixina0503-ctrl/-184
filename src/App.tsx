@@ -32,16 +32,13 @@ export default function App() {
   const [showContributionForm, setShowContributionForm] = useState(false);
   const [user, setUser] = useState<any>(null);
 
-  // Auth 监听
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsubscribe();
   }, []);
 
-  // 数据同步逻辑
   useEffect(() => {
-    // 1. 加载本地缓存
     const localSaved = localStorage.getItem('local_contributions');
     if (localSaved) {
       try {
@@ -53,7 +50,6 @@ export default function App() {
 
     if (!db) return;
 
-    // 2. 监听 Firestore 实时更新
     const q = query(collection(db, 'contributions'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const contributions = snapshot.docs.map(doc => ({
@@ -75,7 +71,6 @@ export default function App() {
 
   const handleReset = () => setSelectedFolklore(null);
 
-  // 性能优化：合并数据
   const allFolklore = useMemo(() => {
     const filteredBase = activeMonth === 0 
       ? folkloreData 
@@ -88,7 +83,6 @@ export default function App() {
     return [...filteredBase, ...filteredUser];
   }, [activeMonth, userContributions]);
 
-  // 性能优化：生成时间轴项目
   const timelineItems = useMemo(() => {
     if (allFolklore.length === 0) return [];
     const currentIndex = selectedFolklore 
@@ -105,14 +99,8 @@ export default function App() {
   const activeMonthData = months.find(m => m.id === activeMonth);
 
   return (
-    <div className="bento-card col-span-3 row-span-3 !p-0 bg-[#020205] flex flex-col overflow-hidden relative z-0"> 
-      {/* 注意这里添加了 z-0，确保它处于基础层级 */}
-      <div className="absolute top-4 left-4 z-10 ...">...</div>
-      <div className="flex-grow relative">
-        <FolkloreMap ... />
-      </div>
-   </div>
-
+    <div className="flex flex-col h-screen w-full bg-[#050505] text-text-main p-4 md:p-6 gap-6 overflow-hidden">
+      
       <header className="flex justify-between items-center shrink-0">
         <div className="brand">
           <h1 className="font-serif text-3xl tracking-widest text-gold">華夏民俗志</h1>
@@ -124,10 +112,10 @@ export default function App() {
         </div>
       </header>
 
-      <main className="grid grid-cols-4 grid-rows-4 gap-4 flex-grow relative min-h-0 border border-white/5 rounded-3xl">
+      <main className="grid grid-cols-4 grid-rows-4 gap-4 flex-grow relative min-h-0">
         
         {/* 地图卡片 */}
-        <div className="bento-card col-span-3 row-span-3 !p-0 bg-[#020205] flex flex-col overflow-hidden relative">
+        <div className="bento-card col-span-3 row-span-3 !p-0 bg-[#020205] flex flex-col overflow-hidden relative z-0">
           <div className="absolute top-4 left-4 z-10 flex items-center gap-2 text-gold/60 text-[10px] uppercase tracking-widest font-medium pointer-events-none">
             <Globe size={12} />
             <span>華夏地理圖誌</span>
@@ -212,7 +200,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* 时间轴/画廊项目 */}
+        {/* 时间轴/画廊 */}
         <div className="bento-card col-span-3 row-span-1 !p-0 flex overflow-hidden">
           {timelineItems.length > 0 ? (
             <div className="flex w-full h-full">
@@ -226,7 +214,7 @@ export default function App() {
                     src={item.img || `/images/${item.id}.jpg`} 
                     alt={item.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    onError={(e) => { (e.currentTarget.src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop') }}
+                    onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop' }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                   <div className="absolute inset-0 p-4 flex flex-col justify-between z-10">
@@ -260,14 +248,7 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* 贡献表单弹窗 */}
-      <AnimatePresence>
-        {showContributionForm && (
-          <ContributionForm onClose={() => setShowContributionForm(false)} />
-        )}
-      </AnimatePresence>
-
-      {/* 详情侧边栏 */}
+      {/* 侧边栏详情页 (修复了层级遮挡问题) */}
       <AnimatePresence>
         {selectedFolklore && (
           <motion.div 
@@ -349,7 +330,13 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <footer className="flex justify-between items-center shrink-0 text-[10px] text-text-dim uppercase tracking-widest">
+      <AnimatePresence>
+        {showContributionForm && (
+          <ContributionForm onClose={() => setShowContributionForm(false)} />
+        )}
+      </AnimatePresence>
+
+      <footer className="flex justify-between items-center shrink-0 text-[10px] text-text-dim uppercase tracking-widest mt-auto">
         <div className="flex gap-6">
           <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-accent" /> 岁时节令</span>
           <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-gold" /> 传统技艺</span>
