@@ -105,11 +105,13 @@ export default function App() {
   const activeMonthData = months.find(m => m.id === activeMonth);
 
   return (
-    <div className="fixed inset-0 bg-[#0D0D0F] text-[#F1F1F1] font-sans p-6 flex flex-col gap-6 overflow-hidden">
-      {/* 运行状态悬浮条 */}
-      <div className="absolute top-2 right-2 text-[10px] text-gold z-[100] bg-black/50 px-2 py-1 rounded">
-        系统运行中 | 数据: {allFolklore.length} | 月份: {activeMonthData?.name}
+    <div className="bento-card col-span-3 row-span-3 !p-0 bg-[#020205] flex flex-col overflow-hidden relative z-0"> 
+      {/* 注意这里添加了 z-0，确保它处于基础层级 */}
+      <div className="absolute top-4 left-4 z-10 ...">...</div>
+      <div className="flex-grow relative">
+        <FolkloreMap ... />
       </div>
+   </div>
 
       <header className="flex justify-between items-center shrink-0">
         <div className="brand">
@@ -269,40 +271,79 @@ export default function App() {
       <AnimatePresence>
         {selectedFolklore && (
           <motion.div 
-            initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-full md:w-[450px] bg-[#0A0A0C] border-l border-white/10 z-[200] shadow-2xl flex flex-col"
+            className="fixed top-0 right-0 h-full w-full md:w-[450px] bg-[#0A0A0C] border-l border-white/10 z-[9999] shadow-2xl flex flex-col"
           >
-            <div className="h-64 relative shrink-0">
+            <div className="relative h-64 shrink-0">
               <img 
                 src={selectedFolklore.img || `/images/${selectedFolklore.id}.jpg`}
+                alt={selectedFolklore.name}
                 className="w-full h-full object-cover"
-                onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop' }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop';
+                }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0C] to-transparent" />
-              <button onClick={() => setSelectedFolklore(null)} className="absolute top-4 right-4 p-2 bg-black/50 rounded-full"><X size={20}/></button>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0C] via-transparent to-transparent" />
+              <button 
+                onClick={() => setSelectedFolklore(null)}
+                className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/80 rounded-full transition-colors text-white"
+              >
+                <X size={20} />
+              </button>
             </div>
 
-            <div className="p-8 flex-grow overflow-y-auto no-scrollbar">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="h-[1px] w-8 bg-gold" />
-                <span className="text-gold text-[10px] uppercase tracking-widest font-bold">民俗档案</span>
-              </div>
-              <h2 className="text-3xl font-serif font-bold mb-6">{selectedFolklore.name}</h2>
-              
-              <div className="flex gap-3 mb-8">
-                <span className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg text-xs"><MapPin size={12} />{selectedFolklore.loc}</span>
-                <span className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg text-xs"><Calendar size={12} />{selectedFolklore.date}</span>
-              </div>
+            <div className="p-10 flex-grow overflow-y-auto no-scrollbar">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-[1px] w-8 bg-gold" />
+                  <span className="text-gold text-[10px] uppercase tracking-[0.3em] font-bold">民俗档案</span>
+                </div>
 
-              <div className="space-y-6 text-text-main/80 leading-relaxed">
-                {selectedFolklore.video && (
-                  <div className="rounded-xl overflow-hidden aspect-video bg-black border border-white/10">
-                    <iframe className="w-full h-full" src={selectedFolklore.video} allowFullScreen />
+                <h2 className="text-4xl font-serif font-bold text-white tracking-tight leading-tight mb-6">
+                  {selectedFolklore.name}
+                </h2>
+                
+                <div className="flex flex-wrap gap-3 mb-10">
+                  <span className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-xs text-text-main">
+                    <MapPin size={14} className="text-accent" />
+                    {selectedFolklore.loc}
+                  </span>
+                  <span className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-xs text-text-main">
+                    <Calendar size={14} className="text-accent" />
+                    {selectedFolklore.date}
+                  </span>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="text-gold/40 text-[10px] uppercase tracking-[0.2em] font-bold whitespace-nowrap">文化概览</div>
+                    <div className="h-[1px] flex-grow bg-white/5" />
                   </div>
-                )}
-                <p className="first-letter:text-3xl first-letter:text-gold first-letter:font-serif">{selectedFolklore.desc}</p>
-              </div>
+                  <p className="text-text-main/90 leading-relaxed text-lg font-light first-letter:text-3xl first-letter:font-serif first-letter:text-gold first-letter:mr-1">
+                    {selectedFolklore.desc}
+                  </p>
+                </div>
+
+                <div className="mt-16 grid grid-cols-2 gap-4">
+                  <button className="bg-gold text-bg py-4 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-white transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-gold/10">
+                    <Info size={16} />
+                    深入探索
+                  </button>
+                  <button className="bg-white/5 border border-white/10 text-white py-4 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-2">
+                    <RotateCcw size={16} />
+                    收藏记录
+                  </button>
+                </div>
+                
+                <div className="h-20" />
+              </motion.div>
             </div>
           </motion.div>
         )}
